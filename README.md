@@ -5,38 +5,36 @@ A fully local web research and summarization agent that autonomously explores to
 ## 🚀 Quickstart with LangGraph server, Ollama and Tavily
 
 Pull a local LLM that you want to use from [Ollama](https://ollama.com/search):
-```
+```bash
 ollama pull llama3.1
 ```
 
 Install the langgraph CLI:
-```
+```bash
 pip install -U "langgraph-cli[inmem]"
 ```
 
 Install dependencies:
-```
+```bash
 pip install -e .
 ```
 
 Load API keys into the environment for web search:
-```
+```bash
 export TAVILY_API_KEY=<your_tavily_api_key>
 ```
 
 Launch the agent:
-```
+```bash
 langgraph dev
 ```
 
 If all is well, you should see the following output:
-```
-Ready!
 
-API: http://127.0.0.1:2024
-Docs: http://127.0.0.1:2024/docs
-LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
-```
+> Ready!
+> API: http://127.0.0.1:2024
+> Docs: http://127.0.0.1:2024/docs
+> LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 
 Open `LangGraph Studio Web UI` via the URL in the output. 
 
@@ -45,6 +43,8 @@ In the `configuration` tab:
 * You can set the depth of the research iterations (it will by default be `3`)
 
 Given the agent a topic for research!
+
+
 
 ## How it works
 
