@@ -32,8 +32,11 @@ langgraph dev
 If all is well, you should see the following output:
 
 > Ready!
+> 
 > API: http://127.0.0.1:2024
+> 
 > Docs: http://127.0.0.1:2024/docs
+> 
 > LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 
 Open `LangGraph Studio Web UI` via the URL in the output. 
