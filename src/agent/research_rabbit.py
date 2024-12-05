@@ -10,9 +10,8 @@ from typing_extensions import TypedDict, Annotated, Literal
 
 # ------------------------------------------------------------
 # LLMs 
-configurable = Configuration.from_runnable_config(Configuration)
-llm = ChatOllama(model=configurable.local_llm, temperature=0)
-llm_json_mode = ChatOllama(model=configurable.local_llm, temperature=0, format="json")
+llm = ChatOllama(model=Configuration.local_llm, temperature=0)
+llm_json_mode = ChatOllama(model=Configuration.local_llm, temperature=0, format="json")
 
 # ------------------------------------------------------------
 # Search
