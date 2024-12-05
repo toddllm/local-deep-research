@@ -42,9 +42,11 @@ In the `configuration` tab:
 * You can set the name of your local LLM (it will by default be `llama3.1`) 
 * You can set the depth of the research iterations (it will by default be `3`)
 
-Given the agent a topic for research!
+![Screenshot 2024-12-05 at 3 23 46 PM](https://github.com/user-attachments/assets/3c328426-b107-4ed5-82a5-625193f18435)
 
+Give the agent a topic for research, and you can visualize its process.
 
+![Screenshot 2024-12-05 at 2 58 26 PM](https://github.com/user-attachments/assets/a409203b-60b7-41ee-9a6a-7defb3d520a7)
 
 ## How it works
 
