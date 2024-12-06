@@ -68,5 +68,8 @@ All sources gathered during research are saved to the graph state.
 
 You can visualize them in the graph state, which is visible in LangGraph Studio:
 
+![Screenshot 2024-12-05 at 4 08 59 PM](https://github.com/user-attachments/assets/e8ac1c0b-9acb-4a75-8c15-4e677e92f6cb)
+
 The final summary is saved to the graph state as well: 
 
+![Screenshot 2024-12-05 at 4 10 11 PM](https://github.com/user-attachments/assets/f6d997d5-9de5-495f-8556-7d3891f6bc96)
