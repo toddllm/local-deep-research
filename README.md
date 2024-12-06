@@ -1,6 +1,6 @@
 # Research Rabbit 🐰
 
-A fully local web research and summarization agent that autonomously explores topics in depth through iterative research cycles.
+Research Rabbit is a web research and summarization agent that autonomously goes down the rabbit-hole of a user-defined topic through iterative research cycles. It uses an LLM to generate a search query, gets web search results, uses an LLM to summarize them related to the user's topic, reflects on the summary asks a follow-up question to fill knowlege gaps, gathers web search results for the follow-up question, and updates the summary. This repeats for a set number of cycles. It is configured to run with fully local LLMs (via [Ollama](https://ollama.com/search)), meaning it has no cost for reasoning! 
 
 ## 🚀 Quickstart with LangGraph server, Ollama and Tavily
 
