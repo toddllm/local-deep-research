@@ -30,7 +30,6 @@ langgraph dev
 ```
 
 If all is well, you should see the following output:
-
 > Ready!
 > 
 > API: http://127.0.0.1:2024
@@ -53,21 +52,21 @@ Give the agent a topic for research, and you can visualize its process.
 
 ## How it works
 
-Research Rabbit is a  AI-powered research assistant that:
-- Conducts iterative web research on any given topic
-- Generates targeted search queries
-- Summarizes findings from multiple sources
-- Identifies knowledge gaps and explores them automatically
-- Creates comprehensive research summaries with cited sources
+Research Rabbit is a AI-powered research assistant that:
+- Given a user-provided topic, uses a local LLM (configured for [Ollama](https://ollama.com/search)) to generate a targeted web search query
+- Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
+- Uses a local LLM to summarizing the findings from web search related to the user-provided research topic
+- Then, used the local LLM to reflect on the summary, identifying knowledge gaps and generating a new search query to explore the gaps
+- The process repeats, with the summary being iteratively updated with new information from web search
+- It will repeat down the research rabbit hole for a configurable number of iterations (configured in the `configuration` tab)  
 
-## Features
+## Outputs
 
-- **Autonomous Research**: Continues down the research rabbit hole through multiple iterations
-- **Local LLM Integration**: Uses local LLMs via Ollama (supports llama2/3)
-- **Web Search**: Integrates with Tavily API for accurate web search results
-- **Smart Summarization**: Incrementally builds knowledge while avoiding redundancy
-- **Source Management**: Automatically deduplicates and formats source citations
-- **Configurable Depth**: Customizable research iteration depth
+The output of the graph is a markdown file containing the research summary, with citations to the sources used.
 
+All sources gathered during research are saved to the graph state. 
 
+You can visualize them in the graph state, which is visible in LangGraph Studio:
+
+The final summary is saved to the graph state as well: 
 
