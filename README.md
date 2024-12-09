@@ -2,7 +2,7 @@
 
 Research Rabbit is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses an LLM to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses an LLM to reflect on the summary, examines knowledge gaps, and generates a new search query to fill the gaps. This repeats for a user-defined number of cycles, updating the summary with new information from web search and provided the user a final markdown summary with all sources used. It is configured to run with fully local LLMs (via [Ollama](https://ollama.com/search))! 
 
-## 🚀 Quickstart with LangGraph server, Ollama and Tavily
+## 🚀 Quickstart
 
 Pull a local LLM that you want to use from [Ollama](https://ollama.com/search):
 ```bash
@@ -24,7 +24,7 @@ For free web search (up to 1000 requests), [you can use the Tavily API](https://
 export TAVILY_API_KEY=<your_tavily_api_key>
 ```
 
-Launch the agent:
+Launch the assistant:
 ```bash
 langgraph dev
 ```
@@ -46,19 +46,20 @@ In the `configuration` tab:
 
 ![Screenshot 2024-12-05 at 3 23 46 PM](https://github.com/user-attachments/assets/3c328426-b107-4ed5-82a5-625193f18435)
 
-Give the agent a topic for research, and you can visualize its process!
+Give the assistant a topic for research, and you can visualize its process!
 
 ![Screenshot 2024-12-05 at 2 58 26 PM](https://github.com/user-attachments/assets/a409203b-60b7-41ee-9a6a-7defb3d520a7)
 
 ## How it works
 
 Research Rabbit is a AI-powered research assistant that:
-- Given a user-provided topic, uses a local LLM (configured for [Ollama](https://ollama.com/search)) to generate a targeted web search query
+- Given a user-provided topic, uses a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
 - Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
 - Uses a local LLM to summarize the findings from web search related to the user-provided research topic
 - Then, it uses the local LLM to reflect on the summary, identifying knowledge gaps and generating a new search query to explore the gaps
 - The process repeats, with the summary being iteratively updated with new information from web search
-- It will repeat down the research rabbit hole for a configurable number of iterations (configured in the `configuration` tab)  
+- It will repeat down the research rabbit hole 
+- Runs for a configurable number of iterations (see `configuration` tab)  
 
 This is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.), which handles complex queries by decomposing the query into simpler sub-queries. This follows a sequential, interleaved process where each sub-query depends on the answer retrieved from the previous one, enabling dynamic query decomposition and adaptive retrieval.
 
