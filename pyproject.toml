@@ -1,7 +1,7 @@
 [project]
 name = "research-rabbit"
 version = "0.0.1"
-description = "Full local web research and summarization agent."
+description = "Lightweight web research and summarization assistant."
 authors = [
     { name = "Lance Martin" }
 ]
