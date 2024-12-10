@@ -26,7 +26,7 @@ build-backend = "setuptools.build_meta"
 packages = ["research_rabbit"]
 
 [tool.setuptools.package-dir]
-"research_rabbit" = "src"
+"research_rabbit" = "src/research_rabbit"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]

@@ -11,27 +11,20 @@ Pull a local LLM that you want to use from [Ollama](https://ollama.com/search):
 ollama pull llama3.2
 ```
 
-Install the langgraph CLI:
-```bash
-pip install -U "langgraph-cli[inmem]"
-```
-
-Install dependencies:
-```bash
-pip install -e .
-```
-
 For free web search (up to 1000 requests), [you can use the Tavily API](https://tavily.com/):
 ```bash
 export TAVILY_API_KEY=<your_tavily_api_key>
 ```
 
-Launch the assistant:
+Clone the repository and launch the assistant with the LangGraph server:
 ```bash
-langgraph dev
+curl -LsSf https://astral.sh/uv/install.sh | sh
+git clone https://github.com/langchain-ai/research-rabbit.git
+cd research-rabbit
+uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 langgraph dev
 ```
 
-You should see the following output:
+You should see the following output and Studio will open in your browser:
 > Ready!
 > 
 > API: http://127.0.0.1:2024
