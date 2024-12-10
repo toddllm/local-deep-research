@@ -23,10 +23,10 @@ requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["agent"]
+packages = ["research_rabbit"]
 
 [tool.setuptools.package-dir]
-"agent" = "src/agent"
+"research_rabbit" = "src"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]

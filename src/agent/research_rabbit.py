@@ -7,10 +7,10 @@ from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
-from agent.configuration import Configuration
-from agent.utils import deduplicate_and_format_sources, tavily_search, format_sources
-from agent.state import SummaryState, SummaryStateInput, SummaryStateOutput
-from agent.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
+from research_rabbit.agent.configuration import Configuration
+from research_rabbit.agent.utils import deduplicate_and_format_sources, tavily_search, format_sources
+from research_rabbit.agent.state import SummaryState, SummaryStateInput, SummaryStateOutput
+from research_rabbit.agent.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
 
 # LLM
 llm = ChatOllama(model=Configuration.local_llm, temperature=0)
