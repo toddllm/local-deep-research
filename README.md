@@ -1,6 +1,6 @@
 # Ollama Deep Researcher
 
-Ollama Deep Researcher is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses a local LLM hosted by [Ollama](https://ollama.com/search) to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses an LLM to reflect on the summary, examine knowledge gaps, and generate a new search query to fill the gaps. This repeats for a user-defined number of cycles, updating the summary with new information from web search and provided the user a final markdown summary with all sources used. It is configured to run with fully local any LLMs (via [Ollama](https://ollama.com/search)). 
+Ollama Deep Researcher is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses a local LLM hosted by [Ollama](https://ollama.com/search) to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses the same LLM to reflect on the summary, examine knowledge gaps, and generate a new search query to fill the gaps. This repeats for a user-defined number of cycles, iteratively updating and improving the summary with new information from web search and providing the user a final markdown summary with all sources used. It is configured to run with fully local any LLMs (via [Ollama](https://ollama.com/search)). 
 
 ![research-rabbit](https://github.com/user-attachments/assets/4308ee9c-abf3-4abb-9d1e-83e7c2c3f187)
 
@@ -52,7 +52,8 @@ Research Rabbit is a AI-powered research assistant that:
 - Given a user-provided topic, uses a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
 - Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
 - Uses a local LLM to summarize the findings from web search related to the user-provided research topic
-- Then, it uses the local LLM to reflect on the summary, identifying knowledge gaps and generating a new search query to explore the gaps
+- Then, it uses the local LLM to reflect on the summary, identifying knowledge gaps
+- It generates a new search query to address the knowledge gaps
 - The process repeats, with the summary being iteratively updated with new information from web search
 - It will repeat down the research rabbit hole 
 - Runs for a configurable number of iterations (see `configuration` tab)  
