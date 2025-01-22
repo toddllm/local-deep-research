@@ -12,18 +12,16 @@ from assistant.utils import deduplicate_and_format_sources, tavily_search, forma
 from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
 from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
 
-# LLM
-llm = ChatOllama(model=Configuration.local_llm, temperature=0)
-llm_json_mode = ChatOllama(model=Configuration.local_llm, temperature=0, format="json")
-
 # Nodes   
-def generate_query(state: SummaryState):
+def generate_query(state: SummaryState, config: RunnableConfig):
     """ Generate a query for web search """
     
     # Format the prompt
     query_writer_instructions_formatted = query_writer_instructions.format(research_topic=state.research_topic)
 
     # Generate a query
+    configurable = Configuration.from_runnable_config(config)
+    llm_json_mode = ChatOllama(model=configurable.local_llm, temperature=0, format="json")
     result = llm_json_mode.invoke(
         [SystemMessage(content=query_writer_instructions_formatted),
         HumanMessage(content=f"Generate a query for web search:")]
@@ -42,7 +40,7 @@ def web_research(state: SummaryState):
     search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000)
     return {"sources_gathered": [format_sources(search_results)], "research_loop_count": state.research_loop_count + 1, "web_research_results": [search_str]}
 
-def summarize_sources(state: SummaryState):
+def summarize_sources(state: SummaryState, config: RunnableConfig):
     """ Summarize the gathered sources """
     
     # Existing summary
@@ -65,6 +63,8 @@ def summarize_sources(state: SummaryState):
         )
 
     # Run the LLM
+    configurable = Configuration.from_runnable_config(config)
+    llm = ChatOllama(model=configurable.local_llm, temperature=0)
     result = llm.invoke(
         [SystemMessage(content=summarizer_instructions),
         HumanMessage(content=human_message_content)]
@@ -73,10 +73,12 @@ def summarize_sources(state: SummaryState):
     running_summary = result.content
     return {"running_summary": running_summary}
 
-def reflect_on_summary(state: SummaryState):
+def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     """ Reflect on the summary and generate a follow-up query """
 
     # Generate a query
+    configurable = Configuration.from_runnable_config(config)
+    llm_json_mode = ChatOllama(model=configurable.local_llm, temperature=0, format="json")
     result = llm_json_mode.invoke(
         [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
         HumanMessage(content=f"Identify a knowledge gap and generate a follow-up web search query based on our existing knowledge: {state.running_summary}")]
