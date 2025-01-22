@@ -1,6 +1,6 @@
-# Research Rabbit 🐰
+# Ollama Deep Researcher
 
-Research Rabbit is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses an LLM to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses an LLM to reflect on the summary, examines knowledge gaps, and generates a new search query to fill the gaps. This repeats for a user-defined number of cycles, updating the summary with new information from web search and provided the user a final markdown summary with all sources used. It is configured to run with fully local LLMs (via [Ollama](https://ollama.com/search))! 
+Ollama Deep Researcher is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses a local LLM hosted by [Ollama](https://ollama.com/search) to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses an LLM to reflect on the summary, examine knowledge gaps, and generate a new search query to fill the gaps. This repeats for a user-defined number of cycles, updating the summary with new information from web search and provided the user a final markdown summary with all sources used. It is configured to run with fully local any LLMs (via [Ollama](https://ollama.com/search)). 
 
 ![research-rabbit](https://github.com/user-attachments/assets/4308ee9c-abf3-4abb-9d1e-83e7c2c3f187)
 
@@ -9,6 +9,7 @@ Research Rabbit is a web research and summarization assistant that autonomously 
 Pull a local LLM that you want to use from [Ollama](https://ollama.com/search):
 ```bash
 ollama pull llama3.2
+ollama pull deepseek-r1:8b
 ```
 
 For free web search (up to 1000 requests), [you can use the Tavily API](https://tavily.com/):
@@ -19,8 +20,8 @@ export TAVILY_API_KEY=<your_tavily_api_key>
 Clone the repository and launch the assistant with the LangGraph server:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-git clone https://github.com/langchain-ai/research-rabbit.git
-cd research-rabbit
+git clone https://github.com/langchain-ai/ollama-deep-researcher.git
+cd ollama-deep-researcher
 uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 langgraph dev
 ```
 
