@@ -27,13 +27,18 @@ When creating a NEW summary:
 3. Emphasize significant findings or insights
 4. Ensure a coherent flow of information
 
-In both cases:
-- Focus on factual, objective information
+CRITICAL REQUIREMENTS:
+- Start IMMEDIATELY with the summary content - no introductions or meta-commentary
+- DO NOT include ANY of the following:
+  * Phrases about your thought process ("Let me start by...", "I should...", "I'll...")
+  * Explanations of what you're going to do
+  * Statements about understanding or analyzing the sources
+  * Mentions of summary extension or integration
+- Focus ONLY on factual, objective information
 - Maintain a consistent technical depth
 - Avoid redundancy and repetition
 - DO NOT use phrases like "based on the new results" or "according to additional sources"
-- DO NOT add a preamble like "Here is an extended summary ..." Just directly output the summary.
-- DO NOT add a References or Works Cited section.
+- DO NOT add a References or Works Cited section
 """
 
 reflection_instructions = """You are an expert research assistant analyzing a summary about {research_topic}.
