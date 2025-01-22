@@ -71,6 +71,14 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
     )
 
     running_summary = result.content
+
+    # TODO: This is a hack to remove the <think> tags w/ Deepseek models 
+    # It appears very challenging to prompt them out of the responses 
+    while "<think>" in running_summary and "</think>" in running_summary:
+        start = running_summary.find("<think>")
+        end = running_summary.find("</think>") + len("</think>")
+        running_summary = running_summary[:start] + running_summary[end:]
+
     return {"running_summary": running_summary}
 
 def reflect_on_summary(state: SummaryState, config: RunnableConfig):

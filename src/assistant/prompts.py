@@ -39,6 +39,8 @@ CRITICAL REQUIREMENTS:
 - Avoid redundancy and repetition
 - DO NOT use phrases like "based on the new results" or "according to additional sources"
 - DO NOT add a References or Works Cited section
+- DO NOT use any XML-style tags like <think> or <answer>
+- Begin directly with the summary text without any tags, prefixes, or meta-commentary
 """
 
 reflection_instructions = """You are an expert research assistant analyzing a summary about {research_topic}.
