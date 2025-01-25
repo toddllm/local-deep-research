@@ -4,6 +4,12 @@ Ollama Deep Researcher is a web research and summarization assistant that autono
 
 ![research-rabbit](https://github.com/user-attachments/assets/4308ee9c-abf3-4abb-9d1e-83e7c2c3f187)
 
+## 📺 Video Tutorials
+
+See it in action or build it yourself? Check out these helpful video tutorials:
+- [Overview of Ollama Deep Researcher with R1](https://www.youtube.com/watch?v=sGUjmyfof4Q) - Load and test [DeepSeek R1](https://api-docs.deepseek.com/news/news250120).
+- [Building Ollama Deep Researcher from Scratch](https://www.youtube.com/watch?v=XGuTzHoqlj8) - Overview of how this is built.
+
 ## 🚀 Quickstart
 
 Pull a local LLM that you want to use from [Ollama](https://ollama.com/search):
@@ -48,7 +54,7 @@ Give the assistant a topic for research, and you can visualize its process!
 
 ## How it works
 
-Research Rabbit is a AI-powered research assistant that:
+Ollama Deep Researcher is an AI-powered research assistant that:
 - Given a user-provided topic, uses a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
 - Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
 - Uses a local LLM to summarize the findings from web search related to the user-provided research topic
