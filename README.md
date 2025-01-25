@@ -1,6 +1,6 @@
 # Ollama Deep Researcher
 
-Ollama Deep Researcher is a web research and summarization assistant that autonomously goes down the rabbit-hole of any user-defined topic. It uses a local LLM hosted by [Ollama](https://ollama.com/search) to generate a search query based on the user's topic, gets web search results, and uses an LLM to summarize the results. It then uses the same LLM to reflect on the summary, examine knowledge gaps, and generate a new search query to fill the gaps. This repeats for a user-defined number of cycles, iteratively updating and improving the summary with new information from web search and providing the user a final markdown summary with all sources used. It is configured to run with fully local any LLMs (via [Ollama](https://ollama.com/search)). 
+Ollama Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search). Give it a topic, and it will generate a search query, gather web search results, summarize the results, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, and improce the summary for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used. 
 
 ![research-rabbit](https://github.com/user-attachments/assets/4308ee9c-abf3-4abb-9d1e-83e7c2c3f187)
 
@@ -46,25 +46,23 @@ In the `configuration` tab:
 * You can set the name of your local LLM to use with Ollama (it will by default be `llama3.2`) 
 * You can set the depth of the research iterations (it will by default be `3`)
 
-![Screenshot 2024-12-05 at 3 23 46 PM](https://github.com/user-attachments/assets/3c328426-b107-4ed5-82a5-625193f18435)
+<img width="1621" alt="Screenshot 2025-01-24 at 10 08 31 PM" src="https://github.com/user-attachments/assets/7cfd0e04-28fd-4cfa-aee5-9a556d74ab21" />
 
 Give the assistant a topic for research, and you can visualize its process!
 
-![Screenshot 2024-12-05 at 2 58 26 PM](https://github.com/user-attachments/assets/a409203b-60b7-41ee-9a6a-7defb3d520a7)
+<img width="1621" alt="Screenshot 2025-01-24 at 10 08 22 PM" src="https://github.com/user-attachments/assets/4de6bd89-4f3b-424c-a9cb-70ebd3d45c5f" />
 
 ## How it works
 
-Ollama Deep Researcher is an AI-powered research assistant that:
-- Given a user-provided topic, uses a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
+Ollama Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.). This approach will decompose a query into sub-queries, retrieve documents for each one, answer the sub-query, and then build on the answer by retrieving docs for the second sub-query. Here, we do similar:
+- Given a user-provided topic, use a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
 - Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
-- Uses a local LLM to summarize the findings from web search related to the user-provided research topic
-- Then, it uses the local LLM to reflect on the summary, identifying knowledge gaps
+- Uses LLM to summarize the findings from web search related to the user-provided research topic
+- Then, it uses the LLM to reflect on the summary, identifying knowledge gaps
 - It generates a new search query to address the knowledge gaps
 - The process repeats, with the summary being iteratively updated with new information from web search
 - It will repeat down the research rabbit hole 
 - Runs for a configurable number of iterations (see `configuration` tab)  
-
-This is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.), which handles complex queries by decomposing the query into simpler sub-queries. This follows a sequential, interleaved process where each sub-query depends on the answer retrieved from the previous one, enabling dynamic query decomposition and adaptive retrieval.
 
 ## Outputs
 
