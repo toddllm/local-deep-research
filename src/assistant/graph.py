@@ -93,7 +93,16 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     )   
     follow_up_query = json.loads(result.content)
 
-    # Overwrite the search query
+    # Get the follow-up query
+    query = follow_up_query.get('follow_up_query')
+
+    # JSON mode can fail in some cases
+    if not query:
+
+        # Fallback to a placeholder query
+        return {"search_query": f"Tell me more about {state.research_topic}"}
+
+    # Update search query with follow-up query
     return {"search_query": follow_up_query['follow_up_query']}
 
 def finalize_summary(state: SummaryState):
