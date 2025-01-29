@@ -33,12 +33,22 @@ def generate_query(state: SummaryState, config: RunnableConfig):
 def web_research(state: SummaryState, config: RunnableConfig):
     """ Gather information from the web """
     
-    # Search the web
+    # Configure 
     configurable = Configuration.from_runnable_config(config)
-    if configurable.search_api == "tavily":
+
+    # Handle both cases for search_api:
+    # 1. When selected in Studio UI -> returns a string (e.g. "tavily")
+    # 2. When using default -> returns an Enum (e.g. SearchAPI.TAVILY)
+    if isinstance(configurable.search_api, str):
+        search_api = configurable.search_api
+    else:
+        search_api = configurable.search_api.value
+
+    # Search the web
+    if search_api == "tavily":
         search_results = tavily_search(state.search_query, include_raw_content=True, max_results=1)
         search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=True)
-    elif configurable.search_api == "perplexity":
+    elif search_api == "perplexity":
         search_results = perplexity_search(state.search_query, state.research_loop_count)
         search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=False)
     else:
