@@ -12,9 +12,9 @@ class SummaryState:
     running_summary: str = field(default=None) # Final report
 
 @dataclass(kw_only=True)
-class SummaryStateInput(TypedDict):
+class SummaryStateInput:
     research_topic: str = field(default=None) # Report topic     
 
 @dataclass(kw_only=True)
-class SummaryStateOutput(TypedDict):
+class SummaryStateOutput:
     running_summary: str = field(default=None) # Final report
