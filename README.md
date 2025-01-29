@@ -24,21 +24,25 @@ See it in action or build it yourself? Check out these helpful video tutorials:
 ollama pull deepseek-r1:8b
 ```
 
-3. For free web search (up to 1000 requests), [sign up for Tavily](https://tavily.com/). 
+3. Select a web search tool:
 
-4. Set the `TAVILY_API_KEY` environment variable and restart your terminal to ensure it is set:
+* [Tavily API](https://tavily.com/)
+* [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
+
+Set the corresponding environment variable and restart your terminal to ensure it is set:
 
 ```bash
 export TAVILY_API_KEY=<your_tavily_api_key>
+export PERPLEXITY_API_KEY=<your_perplexity_api_key>
 ```
 
-5. (Recommended) Create a virtual environment:
+4. (Recommended) Create a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-6. Clone the repository and launch the assistant with the LangGraph server:
+5. Clone the repository and launch the assistant with the LangGraph server:
 
 ```bash
 # Install uv package manager
@@ -59,18 +63,26 @@ uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 lang
 ollama pull deepseek-r1:8b
 ```
 
-3. For free web search (up to 1000 requests), [sign up for Tavily](https://tavily.com/). 
+3. Select a web search tool:
 
-4. Set the `TAVILY_API_KEY` environment variable in Windows (via System Properties or PowerShell). Crucially, restart your terminal/IDE (or sometimes even your computer) after setting it for the change to take effect.
+* [Tavily API](https://tavily.com/)
+* [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
 
-5. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
+Set the corresponding environment variable in Windows (via System Properties or PowerShell). Crucially, restart your terminal/IDE (or sometimes even your computer) after setting it for the change to take effect:
+
+```bash
+export TAVILY_API_KEY=<your_tavily_api_key>
+export PERPLEXITY_API_KEY=<your_perplexity_api_key>
+```
+
+4. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-6. Clone the repository and launch the assistant with the LangGraph server:
+5. Clone the repository and launch the assistant with the LangGraph server:
 
 ```powershell
 # Clone the repository 
@@ -99,7 +111,8 @@ When you launch LangGraph server, you should see the following output and Studio
 Open `LangGraph Studio Web UI` via the URL in the output above. 
 
 In the `configuration` tab:
-* You can set the name of your local LLM to use with Ollama (it will by default be `llama3.2`) 
+* Pick your web search tool (Tavily or Perplexity) (it will by default be `Tavily`) 
+* Set the name of your local LLM to use with Ollama (it will by default be `llama3.2`) 
 * You can set the depth of the research iterations (it will by default be `3`)
 
 <img width="1621" alt="Screenshot 2025-01-24 at 10 08 31 PM" src="https://github.com/user-attachments/assets/7cfd0e04-28fd-4cfa-aee5-9a556d74ab21" />

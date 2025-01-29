@@ -8,7 +8,7 @@ from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
 from assistant.configuration import Configuration
-from assistant.utils import deduplicate_and_format_sources, tavily_search, format_sources
+from assistant.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search
 from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
 from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
 
@@ -30,14 +30,20 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     
     return {"search_query": query['query']}
 
-def web_research(state: SummaryState):
+def web_research(state: SummaryState, config: RunnableConfig):
     """ Gather information from the web """
     
     # Search the web
-    search_results = tavily_search(state.search_query, include_raw_content=True, max_results=1)
-    
-    # Format the sources
-    search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000)
+    configurable = Configuration.from_runnable_config(config)
+    if configurable.search_api == "tavily":
+        search_results = tavily_search(state.search_query, include_raw_content=True, max_results=1)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=True)
+    elif configurable.search_api == "perplexity":
+        search_results = perplexity_search(state.search_query, state.research_loop_count)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=False)
+    else:
+        raise ValueError(f"Unsupported search API: {configurable.search_api}")
+        
     return {"sources_gathered": [format_sources(search_results)], "research_loop_count": state.research_loop_count + 1, "web_research_results": [search_str]}
 
 def summarize_sources(state: SummaryState, config: RunnableConfig):

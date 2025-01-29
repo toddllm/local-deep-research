@@ -52,8 +52,14 @@ Your tasks:
 
 Ensure the follow-up question is self-contained and includes necessary context for web search.
 
-Return your analysis as a JSON object:
-{{ 
-    "knowledge_gap": "string",
-    "follow_up_query": "string"
-}}"""
+Format your response as a JSON object with two fields:
+- knowledge_gap: Describe what information is missing or needs clarification
+- follow_up_query: Write a specific question to address this gap
+
+Example output:
+{{
+    "knowledge_gap": "The summary lacks information about performance metrics and benchmarks",
+    "follow_up_query": "What are typical performance benchmarks and metrics used to evaluate [specific technology]?"
+}}
+
+Provide your analysis in JSON format:"""
