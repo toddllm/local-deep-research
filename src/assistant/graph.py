@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
-from assistant.configuration import Configuration
+from assistant.configuration import Configuration, SearchAPI
 from assistant.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search
 from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
 from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
