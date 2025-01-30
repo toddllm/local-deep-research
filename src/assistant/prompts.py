@@ -1,15 +1,20 @@
-query_writer_instructions="""Your goal is to generate targeted web search query.
+query_writer_instructions="""Your goal is to generate a targeted web search query.
 
 The query will gather information related to a specific topic.
 
 Topic:
 {research_topic}
 
-Return your query as a JSON object:
+Format your response as a JSON object with ALL three of these exact keys:
+   - "query": The actual search query string
+   - "aspect": The specific aspect of the topic being researched
+   - "rationale": Brief explanation of why this query is relevant
+
+Example output:
 {{
-    "query": "string",
-    "aspect": "string",
-    "rationale": "string"
+    "query": "machine learning transformer architecture explained",
+    "aspect": "technical architecture",
+    "rationale": "Understanding the fundamental structure of transformer models"
 }}
 """
 
@@ -52,7 +57,7 @@ Your tasks:
 
 Ensure the follow-up question is self-contained and includes necessary context for web search.
 
-Format your response as a JSON object with two fields:
+Format your response as a JSON object with these exact keys:
 - knowledge_gap: Describe what information is missing or needs clarification
 - follow_up_query: Write a specific question to address this gap
 
