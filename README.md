@@ -29,11 +29,28 @@ ollama pull deepseek-r1:8b
 * [Tavily API](https://tavily.com/)
 * [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
 
-Set the corresponding environment variable and restart your terminal to ensure it is set:
-
+Copy the example environment file:
 ```bash
-export TAVILY_API_KEY=<your_tavily_api_key>
-export PERPLEXITY_API_KEY=<your_perplexity_api_key>
+cp .env.example .env
+```
+
+Edit the `.env` file with your preferred text editor and add your API keys:
+```bash
+# Required: Choose one search provider and add its API key
+TAVILY_API_KEY=tvly-xxxxx      # Get your key at https://tavily.com
+PERPLEXITY_API_KEY=pplx-xxxxx  # Get your key at https://www.perplexity.ai
+```
+
+Note: If you prefer using environment variables directly, you can set them in your shell:
+```bash
+export TAVILY_API_KEY=tvly-xxxxx
+# OR
+export PERPLEXITY_API_KEY=pplx-xxxxx
+```
+
+After setting the keys, verify they're available:
+```bash
+echo $TAVILY_API_KEY  # Should show your API key
 ```
 
 4. (Recommended) Create a virtual environment:
@@ -68,11 +85,28 @@ ollama pull deepseek-r1:8b
 * [Tavily API](https://tavily.com/)
 * [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
 
-Set the corresponding environment variable in Windows (via System Properties or PowerShell). Crucially, restart your terminal/IDE (or sometimes even your computer) after setting it for the change to take effect:
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your preferred text editor and add your API keys:
+```bash
+# Required: Choose one search provider and add its API key
+TAVILY_API_KEY=tvly-xxxxx      # Get your key at https://tavily.com
+PERPLEXITY_API_KEY=pplx-xxxxx  # Get your key at https://www.perplexity.ai
+```
+
+Note: If you prefer using environment variables directly, you can set them in Windows (via System Properties or PowerShell):
 
 ```bash
 export TAVILY_API_KEY=<your_tavily_api_key>
 export PERPLEXITY_API_KEY=<your_perplexity_api_key>
+```
+
+Crucially, restart your terminal/IDE (or sometimes even your computer) after setting it for the change to take effect. After setting the keys, verify they're available:
+```bash
+echo $TAVILY_API_KEY  # Should show your API key
 ```
 
 4. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
