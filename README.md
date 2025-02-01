@@ -24,17 +24,23 @@ See it in action or build it yourself? Check out these helpful video tutorials:
 ollama pull deepseek-r1:8b
 ```
 
-3. Select a web search tool:
+3. Clone the repository:
+```bash
+git clone https://github.com/langchain-ai/ollama-deep-researcher.git
+cd ollama-deep-researcher
+```
+
+4. Select a web search tool:
 
 * [Tavily API](https://tavily.com/)
 * [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
 
-Copy the example environment file:
+5. Copy the example environment file:
 ```bash
 cp .env.example .env
 ```
 
-Edit the `.env` file with your preferred text editor and add your API keys:
+6. Edit the `.env` file with your preferred text editor and add your API keys:
 ```bash
 # Required: Choose one search provider and add its API key
 TAVILY_API_KEY=tvly-xxxxx      # Get your key at https://tavily.com
@@ -53,21 +59,17 @@ After setting the keys, verify they're available:
 echo $TAVILY_API_KEY  # Should show your API key
 ```
 
-4. (Recommended) Create a virtual environment:
+7. (Recommended) Create a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-5. Clone the repository and launch the assistant with the LangGraph server:
+8. Launch the assistant with the LangGraph server:
 
 ```bash
 # Install uv package manager
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone the repository and start the LangGraph server 
-git clone https://github.com/langchain-ai/ollama-deep-researcher.git
-cd ollama-deep-researcher
 uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 langgraph dev
 ```
 
@@ -80,12 +82,18 @@ uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 lang
 ollama pull deepseek-r1:8b
 ```
 
-3. Select a web search tool:
+3. Clone the repository:
+```bash
+git clone https://github.com/langchain-ai/ollama-deep-researcher.git
+cd ollama-deep-researcher
+```
+ 
+4. Select a web search tool:
 
 * [Tavily API](https://tavily.com/)
 * [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
 
-Copy the example environment file:
+5. Copy the example environment file:
 ```bash
 cp .env.example .env
 ```
@@ -109,14 +117,14 @@ Crucially, restart your terminal/IDE (or sometimes even your computer) after set
 echo $TAVILY_API_KEY  # Should show your API key
 ```
 
-4. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
+7. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-5. Clone the repository and launch the assistant with the LangGraph server:
+8. Launch the assistant with the LangGraph server:
 
 ```powershell
 # Clone the repository 
