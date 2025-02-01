@@ -127,10 +127,6 @@ python -m venv .venv
 8. Launch the assistant with the LangGraph server:
 
 ```powershell
-# Clone the repository 
-git clone https://github.com/langchain-ai/ollama-deep-researcher.git
-cd ollama-deep-researcher
-
 # Install dependencies 
 pip install -e .
 pip install langgraph-cli[inmem]
