@@ -68,14 +68,14 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
     # Build the human message
     if existing_summary:
         human_message_content = (
-            f"Extend the existing summary: {existing_summary}\n\n"
-            f"Include new search results: {most_recent_web_research} "
-            f"That addresses the following topic: {state.research_topic}"
+            f"<User Input> \n {state.research_topic} \n <User Input>\n\n"
+            f"<Existing Summary> \n {existing_summary} \n <Existing Summary>\n\n"
+            f"<New Search Results> \n {most_recent_web_research} \n <New Search Results>"
         )
     else:
         human_message_content = (
-            f"Generate a summary of these search results: {most_recent_web_research} "
-            f"That addresses the following topic: {state.research_topic}"
+            f"<User Input> \n {state.research_topic} \n <User Input>\n\n"
+            f"<Search Results> \n {most_recent_web_research} \n <Search Results>"
         )
 
     # Run the LLM
