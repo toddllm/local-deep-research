@@ -110,6 +110,19 @@ Give the assistant a topic for research, and you can visualize its process!
 
 <img width="1621" alt="Screenshot 2025-01-24 at 10 08 22 PM" src="https://github.com/user-attachments/assets/4de6bd89-4f3b-424c-a9cb-70ebd3d45c5f" />
 
+### Model Compatibility Note
+
+When selecting a local LLM, note that this application relies on the model's ability to produce structured JSON output. Some models may have difficulty with this requirement:
+
+- **Working well**: 
+  - [Llama2 3.2](https://ollama.com/library/llama3.2)
+  - [DeepSeek R1 (8B)](https://ollama.com/library/deepseek-r1:8b)
+  
+- **Known issues**:
+  - [DeepSeek R1 (7B)](https://ollama.com/library/deepseek-llm:7b) - Currently has difficulty producing required JSON output
+  
+If you [encounter JSON-related errors](https://github.com/langchain-ai/ollama-deep-researcher/issues/18) (e.g., `KeyError: 'query'`), try switching to one of the confirmed working models.
+
 ### Browser Compatibility Note
 
 When accessing the LangGraph Studio UI:
