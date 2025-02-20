@@ -110,6 +110,16 @@ Give the assistant a topic for research, and you can visualize its process!
 
 <img width="1621" alt="Screenshot 2025-01-24 at 10 08 22 PM" src="https://github.com/user-attachments/assets/4de6bd89-4f3b-424c-a9cb-70ebd3d45c5f" />
 
+### Browser Compatibility Note
+
+When accessing the LangGraph Studio UI:
+- Firefox is recommended for the best experience
+- Safari users may encounter security warnings due to mixed content (HTTPS/HTTP)
+- If you encounter issues, try:
+  1. Using Firefox or another browser
+  2. Disabling ad-blocking extensions
+  3. Checking browser console for specific error messages
+
 ## How it works
 
 Ollama Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.). This approach will decompose a query into sub-queries, retrieve documents for each one, answer the sub-query, and then build on the answer by retrieving docs for the second sub-query. Here, we do similar:
