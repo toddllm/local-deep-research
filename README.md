@@ -32,40 +32,18 @@ cd ollama-deep-researcher
 
 4. Select a web search tool:
 
-* [Tavily API](https://tavily.com/)
-* [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
-
-5. Copy the example environment file:
+By default, it will use [DuckDuckGo](https://duckduckgo.com/) for web search, which does not require an API key. But you can also use [Tavily](https://tavily.com/) or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api) by adding their API keys to the environment file:
 ```bash
 cp .env.example .env
 ```
-
-6. Edit the `.env` file with your preferred text editor and add your API keys:
-```bash
-# Required: Choose one search provider and add its API key
-TAVILY_API_KEY=tvly-xxxxx      # Get your key at https://tavily.com
-PERPLEXITY_API_KEY=pplx-xxxxx  # Get your key at https://www.perplexity.ai
-```
-
-Note: If you prefer using environment variables directly, you can set them in your shell:
-```bash
-export TAVILY_API_KEY=tvly-xxxxx
-# OR
-export PERPLEXITY_API_KEY=pplx-xxxxx
-```
-
-After setting the keys, verify they're available:
-```bash
-echo $TAVILY_API_KEY  # Should show your API key
-```
-
-7. (Recommended) Create a virtual environment:
+ 
+5. (Recommended) Create a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-8. Launch the assistant with the LangGraph server:
+6. Launch the assistant with the LangGraph server:
 
 ```bash
 # Install uv package manager
@@ -87,44 +65,17 @@ ollama pull deepseek-r1:8b
 git clone https://github.com/langchain-ai/ollama-deep-researcher.git
 cd ollama-deep-researcher
 ```
+ 
+4. Select a web search tool, as above.
 
-4. Select a web search tool:
-
-* [Tavily API](https://tavily.com/)
-* [Perplexity API](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)
-
-5. Copy the example environment file:
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file with your preferred text editor and add your API keys:
-```bash
-# Required: Choose one search provider and add its API key
-TAVILY_API_KEY=tvly-xxxxx      # Get your key at https://tavily.com
-PERPLEXITY_API_KEY=pplx-xxxxx  # Get your key at https://www.perplexity.ai
-```
-
-Note: If you prefer using environment variables directly, you can set them in Windows (via System Properties or PowerShell):
-
-```bash
-export TAVILY_API_KEY=<your_tavily_api_key>
-export PERPLEXITY_API_KEY=<your_perplexity_api_key>
-```
-
-Crucially, restart your terminal/IDE (or sometimes even your computer) after setting it for the change to take effect. After setting the keys, verify they're available:
-```bash
-echo $TAVILY_API_KEY  # Should show your API key
-```
-
-7. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
+5. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-8. Launch the assistant with the LangGraph server:
+6. Launch the assistant with the LangGraph server:
 
 ```powershell
 # Install dependencies
@@ -149,8 +100,8 @@ When you launch LangGraph server, you should see the following output and Studio
 Open `LangGraph Studio Web UI` via the URL in the output above.
 
 In the `configuration` tab:
-* Pick your web search tool (Tavily or Perplexity) (it will by default be `Tavily`)
-* Set the name of your local LLM to use with Ollama (it will by default be `llama3.2`)
+* Pick your web search tool (DuckDuckGo, Tavily, or Perplexity) (it will by default be `DuckDuckGo`) 
+* Set the name of your local LLM to use with Ollama (it will by default be `llama3.2`) 
 * You can set the depth of the research iterations (it will by default be `3`)
 
 <img width="1621" alt="Screenshot 2025-01-24 at 10 08 31 PM" src="https://github.com/user-attachments/assets/7cfd0e04-28fd-4cfa-aee5-9a556d74ab21" />
@@ -163,7 +114,7 @@ Give the assistant a topic for research, and you can visualize its process!
 
 Ollama Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.). This approach will decompose a query into sub-queries, retrieve documents for each one, answer the sub-query, and then build on the answer by retrieving docs for the second sub-query. Here, we do similar:
 - Given a user-provided topic, use a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
-- Uses a search engine (configured for [Tavily](https://www.tavily.com/)) to find relevant sources
+- Uses a search engine (configured for [DuckDuckGo](https://duckduckgo.com/), [Tavily](https://www.tavily.com/), or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)) to find relevant sources
 - Uses LLM to summarize the findings from web search related to the user-provided research topic
 - Then, it uses the LLM to reflect on the summary, identifying knowledge gaps
 - It generates a new search query to address the knowledge gaps
