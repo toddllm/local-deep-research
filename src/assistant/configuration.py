@@ -19,6 +19,7 @@ class Configuration:
     local_llm: str = "llama3.2"
     search_api: SearchAPI = SearchAPI.DUCKDUCKGO  # Default to DUCDUCKGO
     fetch_full_page: bool = False  # Default to False
+    ollama_base_url: str = "http://localhost:11434/"
 
     @classmethod
     def from_runnable_config(
