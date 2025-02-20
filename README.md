@@ -152,6 +152,11 @@ There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#depl
 
 See [Module 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6) of LangChain Academy for a detailed walkthrough of deployment options with LangGraph.
 
+## TypeScript Implementation
+
+A TypeScript port of this project (without Perplexity search) is available at:
+https://github.com/PacoVK/ollama-deep-researcher-ts
+
 ## Running as a Docker container
 
 The included `Dockerfile` only runs LangChain Studio with ollama-deep-researcher as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable.
