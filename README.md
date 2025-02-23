@@ -36,7 +36,17 @@ By default, it will use [DuckDuckGo](https://duckduckgo.com/) for web search, wh
 ```bash
 cp .env.example .env
 ```
- 
+
+The following environment variables are supported:
+
+  * `OLLAMA_BASE_URL` - the endpoint of the Ollama service, defaults to `http://localhost:11434` if not set 
+  * `OLLAMA_MODEL` - the model to use, defaults to `llama3.2` if not set
+  * `SEARCH_API` - the search API to use, either `duckduckgo` (default) or `tavily` or `perplexity`. You need to set the corresponding API key if tavily or perplexity is used.
+  * `TAVILY_API_KEY` - the tavily API key to use
+  * `PERPLEXITY_API_KEY` - the perplexity API key to use
+  * `MAX_WEB_RESEARCH_LOOPS` - the maximum number of research loop steps, defaults to `3`
+  * `FETCH_FULL_PAGE` - fetch the full page content if using `duckduckgo` for the search API, defaults to `false`
+
 5. (Recommended) Create a virtual environment:
 ```bash
 python -m venv .venv
@@ -182,8 +192,10 @@ $ docker build -t ollama-deep-researcher .
 Run the container:
 ```
 $ docker run --rm -it -p 2024:2024 \
+  -e SEARCH_API="tavily" \ 
   -e TAVILY_API_KEY="tvly-***YOUR_KEY_HERE***" \
   -e OLLAMA_BASE_URL="http://host.docker.internal:11434/" \
+  -e OLLAMA_MODEL="llama3.2" \  
   ollama-deep-researcher
 ```
 
