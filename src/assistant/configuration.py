@@ -16,10 +16,10 @@ class SearchAPI(Enum):
 class Configuration:
     """The configurable fields for the research assistant."""
     max_web_research_loops: int = 3
-    local_llm: str = "llama3.2"
+    local_llm: str = os.environ.get("OLLAMA_MODEL", "llama3.2")
     search_api: SearchAPI = SearchAPI.DUCKDUCKGO  # Default to DUCDUCKGO
     fetch_full_page: bool = False  # Default to False
-    ollama_base_url: str = "http://localhost:11434/"
+    ollama_base_url: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434/")
 
     @classmethod
     def from_runnable_config(
