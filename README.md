@@ -182,7 +182,7 @@ https://github.com/PacoVK/ollama-deep-researcher-ts
 
 ## Running as a Docker container
 
-The included `Dockerfile` only runs LangChain Studio with ollama-deep-researcher as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable.
+The included `Dockerfile` only runs LangChain Studio with ollama-deep-researcher as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable. Optionally you can also specify the Ollama model to use by providing the `OLLAMA_MODEL` environment variable.
 
 Clone the repo and build an image:
 ```
