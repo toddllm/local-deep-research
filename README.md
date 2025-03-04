@@ -90,7 +90,7 @@ python -m venv .venv
 ```powershell
 # Install dependencies
 pip install -e .
-pip install langgraph-cli[inmem]
+pip install -U "langgraph-cli[inmem]"            
 
 # Start the LangGraph server
 langgraph dev
