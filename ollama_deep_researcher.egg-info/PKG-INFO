@@ -1,3 +1,21 @@
+Metadata-Version: 2.2
+Name: ollama-deep-researcher
+Version: 0.0.1
+Summary: Lightweight web research and summarization assistant.
+Author: Lance Martin
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: langgraph>=0.2.55
+Requires-Dist: langchain-community>=0.3.9
+Requires-Dist: tavily-python>=0.5.0
+Requires-Dist: langchain-ollama>=0.2.1
+Requires-Dist: duckduckgo-search>=7.3.0
+Requires-Dist: beautifulsoup4>=4.13.3
+Provides-Extra: dev
+Requires-Dist: mypy>=1.11.1; extra == "dev"
+Requires-Dist: ruff>=0.6.1; extra == "dev"
+
 # Ollama Deep Researcher
 
 Ollama Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search). Give it a topic and it will generate a web search query, gather web search results (via [Tavily](https://www.tavily.com/) by default), summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, search, and improve the summary for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used.
@@ -32,7 +50,7 @@ cd ollama-deep-researcher
 
 4. Select a web search tool:
 
-By default, it will use [DuckDuckGo](https://duckduckgo.com/) for web search, which does not require an API key. But you can also use [SearXNG](https://docs.searxng.org/), [Tavily](https://tavily.com/) or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api) by adding their API keys to the environment file:
+By default, it will use [DuckDuckGo](https://duckduckgo.com/) for web search, which does not require an API key. But you can also use [Tavily](https://tavily.com/) or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api) by adding their API keys to the environment file:
 ```bash
 cp .env.example .env
 ```
