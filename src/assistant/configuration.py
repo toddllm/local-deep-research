@@ -11,6 +11,7 @@ class SearchAPI(Enum):
     PERPLEXITY = "perplexity"
     TAVILY = "tavily"
     DUCKDUCKGO = "duckduckgo"
+    SEARXNG = "searxng"
 
 @dataclass(kw_only=True)
 class Configuration:
