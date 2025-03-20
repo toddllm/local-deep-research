@@ -4,6 +4,41 @@ from typing import Dict, Any, List
 from langsmith import traceable
 from tavily import TavilyClient
 from duckduckgo_search import DDGS
+from langchain_community.utilities import SearxSearchWrapper
+
+def get_config_value(value):
+    """
+    Helper function to handle both string and enum cases of configuration values.
+    
+    Args:
+        value: The configuration value to process. Can be a string or an Enum.
+    
+    Returns:
+        str: The string representation of the value.
+        
+    Examples:
+        >>> get_config_value("tavily")
+        'tavily'
+        >>> get_config_value(SearchAPI.TAVILY)
+        'tavily'
+    """
+    return value if isinstance(value, str) else value.value
+
+def strip_thinking_tokens(text: str) -> str:
+    """Remove <think> tags and their content from the text.
+    
+    Args:
+        text (str): The text to process
+        
+    Returns:
+        str: The text with thinking tokens removed
+    """
+
+    while "<think>" in text and "</think>" in text:
+        start = text.find("<think>")
+        end = text.find("</think>") + len("</think>")
+        text = text[:start] + text[end:]
+    return text
 
 def deduplicate_and_format_sources(search_response, max_tokens_per_source, include_raw_content=False):
     """
@@ -71,6 +106,18 @@ def format_sources(search_results):
         f"* {source['title']} : {source['url']}"
         for source in search_results['results']
     )
+def fetch_raw_content(url):
+    try:
+        # Try to fetch the full page content using curl
+        import urllib.request
+        from bs4 import BeautifulSoup
+        response = urllib.request.urlopen(url)
+        html = response.read()
+        soup = BeautifulSoup(html, 'html.parser')
+        return soup.get_text()
+        
+    except Exception as e:
+        print(f"Warning: Failed to fetch full page content for {url}: {str(e)}")
 
 @traceable
 def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = False) -> Dict[str, List[Dict[str, str]]]:
@@ -104,18 +151,7 @@ def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = 
 
                 raw_content = content
                 if fetch_full_page:
-                    try:
-                        # Try to fetch the full page content using curl
-                        import urllib.request
-                        from bs4 import BeautifulSoup
-
-                        response = urllib.request.urlopen(url)
-                        html = response.read()
-                        soup = BeautifulSoup(html, 'html.parser')
-                        raw_content = soup.get_text()
-                        
-                    except Exception as e:
-                        print(f"Warning: Failed to fetch full page content for {url}: {str(e)}")
+                    raw_content = fetch_raw_content(url)
                 
                 # Add result to list
                 result = {
@@ -131,6 +167,52 @@ def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = 
         print(f"Error in DuckDuckGo search: {str(e)}")
         print(f"Full error details: {type(e).__name__}")
         return {"results": []}
+
+@traceable
+def searxng_search(query: str, max_results: int = 3, fetch_full_page = False):
+    """Search the web using SearXNG.
+    
+    Args:
+        query (str): The search query to execute
+        max_results (int): Maximum number of results to return
+        fetch_full_page: Fetch page content from results urls
+        
+    Returns:
+        dict: Search response containing:
+            - results (list): List of search result dictionaries, each containing:
+                - title (str): Title of the search result
+                - url (str): URL of the search result
+                - content (str): Snippet/summary of the content
+                - raw_content (str): Same as content since SearXNG doesn't provide full page content, unless fetch_full_page is true
+    """
+    host=os.environ.get("SEARXNG_URL", "http://localhost:8888")
+    s = SearxSearchWrapper(searx_host=host)
+
+    results = []
+    search_results = s.results(query, num_results=max_results)
+    for r in search_results:
+        url = r.get('link')
+        title = r.get('title')
+        content = r.get('snippet')
+        
+        if not all([url, title, content]):
+            print(f"Warning: Incomplete result from SearXNG: {r}")
+            continue
+
+        raw_content = content
+        if fetch_full_page:
+            raw_content = fetch_raw_content(url)
+        
+        # Add result to list
+        result = {
+            "title": title,
+            "url": url,
+            "content": content,
+            "raw_content": raw_content
+        }
+        results.append(result)
+    return {"results": results}
+    
 
 @traceable
 def tavily_search(query, include_raw_content=True, max_results=3):

@@ -8,32 +8,58 @@ from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
 from ollama_deep_researcher.configuration import Configuration, SearchAPI
-from ollama_deep_researcher.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search
+from ollama_deep_researcher.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search, searxng_search, strip_thinking_tokens, get_config_value
 from ollama_deep_researcher.state import SummaryState, SummaryStateInput, SummaryStateOutput
-from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
+from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions, get_current_date
+from ollama_deep_researcher.lmstudio import ChatLMStudio
 
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
     """ Generate a query for web search """
 
     # Format the prompt
-    query_writer_instructions_formatted = query_writer_instructions.format(research_topic=state.research_topic)
+    current_date = get_current_date()
+    formatted_prompt = query_writer_instructions.format(
+        current_date=current_date,
+        research_topic=state.research_topic
+    )
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
-    llm_json_mode = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0, format="json")
+    
+    # Choose the appropriate LLM based on the provider
+    if configurable.llm_provider == "lmstudio":
+        llm_json_mode = ChatLMStudio(
+            base_url=configurable.lmstudio_base_url, 
+            model=configurable.local_llm, 
+            temperature=0, 
+            format="json"
+        )
+    else: # Default to Ollama
+        llm_json_mode = ChatOllama(
+            base_url=configurable.ollama_base_url, 
+            model=configurable.local_llm, 
+            temperature=0, 
+            format="json"
+        )
+    
     result = llm_json_mode.invoke(
-        [SystemMessage(content=query_writer_instructions_formatted),
+        [SystemMessage(content=formatted_prompt),
         HumanMessage(content=f"Generate a query for web search:")]
     )
     
+    # Strip thinking tokens if configured
+    content = result.content
+    if configurable.strip_thinking_tokens:
+        content = strip_thinking_tokens(content)
+    
+    # Parse the JSON response
     try:
-        query = json.loads(result.content)
+        query = json.loads(content)
         search_query = query['query']
     except (json.JSONDecodeError, KeyError):
         # Fallback for models that don't follow the structured output format
-        search_query = result.content
-
+        search_query = content
     return {"search_query": search_query}
 
 def web_research(state: SummaryState, config: RunnableConfig):
@@ -42,13 +68,8 @@ def web_research(state: SummaryState, config: RunnableConfig):
     # Configure
     configurable = Configuration.from_runnable_config(config)
 
-    # Handle both cases for search_api:
-    # 1. When selected in Studio UI -> returns a string (e.g. "tavily")
-    # 2. When using default -> returns an Enum (e.g. SearchAPI.TAVILY)
-    if isinstance(configurable.search_api, str):
-        search_api = configurable.search_api
-    else:
-        search_api = configurable.search_api.value
+    # Get the search API
+    search_api = get_config_value(configurable.search_api)
 
     # Search the web
     if search_api == "tavily":
@@ -60,6 +81,9 @@ def web_research(state: SummaryState, config: RunnableConfig):
     elif search_api == "duckduckgo":
         search_results = duckduckgo_search(state.search_query, max_results=3, fetch_full_page=configurable.fetch_full_page)
         search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=True)
+    elif search_api == "searxng":
+        search_results = searxng_search(state.search_query, max_results=3, fetch_full_page=configurable.fetch_full_page)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=False)
     else:
         raise ValueError(f"Unsupported search API: {configurable.search_api}")
 
@@ -89,20 +113,30 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
 
     # Run the LLM
     configurable = Configuration.from_runnable_config(config)
-    llm = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0)
+    
+    # Choose the appropriate LLM based on the provider
+    if configurable.llm_provider == "lmstudio":
+        llm = ChatLMStudio(
+            base_url=configurable.lmstudio_base_url, 
+            model=configurable.local_llm, 
+            temperature=0
+        )
+    else:  # Default to Ollama
+        llm = ChatOllama(
+            base_url=configurable.ollama_base_url, 
+            model=configurable.local_llm, 
+            temperature=0
+        )
+    
     result = llm.invoke(
         [SystemMessage(content=summarizer_instructions),
         HumanMessage(content=human_message_content)]
     )
 
+    # Strip thinking tokens if configured
     running_summary = result.content
-
-    # TODO: This is a hack to remove the <think> tags w/ Deepseek models
-    # It appears very challenging to prompt them out of the responses
-    while "<think>" in running_summary and "</think>" in running_summary:
-        start = running_summary.find("<think>")
-        end = running_summary.find("</think>") + len("</think>")
-        running_summary = running_summary[:start] + running_summary[end:]
+    if configurable.strip_thinking_tokens:
+        running_summary = strip_thinking_tokens(running_summary)
 
     return {"running_summary": running_summary}
 
@@ -111,16 +145,35 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
-    llm_json_mode = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0, format="json")
+    
+    # Choose the appropriate LLM based on the provider
+    if configurable.llm_provider == "lmstudio":
+        llm_json_mode = ChatLMStudio(
+            base_url=configurable.lmstudio_base_url, 
+            model=configurable.local_llm, 
+            temperature=0, 
+            format="json"
+        )
+    else:  # Default to Ollama
+        llm_json_mode = ChatOllama(
+            base_url=configurable.ollama_base_url, 
+            model=configurable.local_llm, 
+            temperature=0, 
+            format="json"
+        )
+    
     result = llm_json_mode.invoke(
         [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
         HumanMessage(content=f"Identify a knowledge gap and generate a follow-up web search query based on our existing knowledge: {state.running_summary}")]
     )
     
+    # Strip thinking tokens if configured
+    reflection_content = result.content
+    if configurable.strip_thinking_tokens:
+        reflection_content = strip_thinking_tokens(reflection_content)
+    
     try:
-        follow_up_query = json.loads(result.content)
-        # Get the follow-up query
-        query = follow_up_query.get('follow_up_query')
+        query = reflection_content.get('follow_up_query')
         
         # JSON mode can fail in some cases
         if not query:
@@ -128,6 +181,7 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
             return {"search_query": f"Tell me more about {state.research_topic}"}
         
         return {"search_query": query}
+    
     except (json.JSONDecodeError, KeyError):
         # Fallback for models that don't follow the structured output format or malformed JSON
         return {"search_query": f"Tell me more about {state.research_topic}"}

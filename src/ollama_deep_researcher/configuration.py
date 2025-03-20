@@ -1,9 +1,8 @@
 import os
-from dataclasses import dataclass, fields
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List, Literal
+from pydantic import BaseModel, Field
 
 from langchain_core.runnables import RunnableConfig
-from dataclasses import dataclass
 
 from enum import Enum
 
@@ -11,15 +10,52 @@ class SearchAPI(Enum):
     PERPLEXITY = "perplexity"
     TAVILY = "tavily"
     DUCKDUCKGO = "duckduckgo"
+    SEARXNG = "searxng"
 
 @dataclass(kw_only=True)
 class Configuration:
     """The configurable fields for the research assistant."""
-    max_web_research_loops: int = 3 # Default to 3 loops of research
-    local_llm: str = "llama3.2" # Default to llama3.2 
-    search_api: SearchAPI = SearchAPI.DUCKDUCKGO  # Default to DUCDUCKGO
-    fetch_full_page: bool = False  # Default to False
-    ollama_base_url: str = "http://localhost:11434/"
+
+    max_web_research_loops: int = Field(
+        default=3,
+        title="Research Depth",
+        description="Number of research iterations to perform"
+    )
+    local_llm: str = Field(
+        default="llama3.2",
+        title="LLM Model Name",
+        description="Name of the LLM model to use"
+    )
+    llm_provider: Literal["ollama", "lmstudio"] = Field(
+        default="ollama",
+        title="LLM Provider",
+        description="Provider for the LLM (Ollama or LMStudio)"
+    )
+    search_api: Literal["perplexity", "tavily", "duckduckgo"] = Field(
+        default="duckduckgo",
+        title="Search API",
+        description="Web search API to use"
+    )
+    fetch_full_page: bool = Field(
+        default=False,
+        title="Fetch Full Page",
+        description="Whether to fetch the full page content (DuckDuckGo only)"
+    )
+    ollama_base_url: str = Field(
+        default="http://localhost:11434/",
+        title="Ollama Base URL",
+        description="Base URL for Ollama API"
+    )
+    lmstudio_base_url: str = Field(
+        default="http://localhost:1234/v1",
+        title="LMStudio Base URL",
+        description="Base URL for LMStudio OpenAI-compatible API"
+    )
+    strip_thinking_tokens: bool = Field(
+        default=True,
+        title="Strip Thinking Tokens",
+        description="Whether to strip <think> tokens from model responses"
+    )
 
     @classmethod
     def from_runnable_config(
@@ -29,9 +65,14 @@ class Configuration:
         configurable = (
             config["configurable"] if config and "configurable" in config else {}
         )
-        values: dict[str, Any] = {
-            f.name: os.environ.get(f.name.upper(), configurable.get(f.name))
-            for f in fields(cls)
-            if f.init
+        
+        # Get raw values from environment or config
+        raw_values: dict[str, Any] = {
+            name: os.environ.get(name.upper(), configurable.get(name))
+            for name in cls.model_fields.keys()
         }
-        return cls(**{k: v for k, v in values.items() if v})
+        
+        # Filter out None values
+        values = {k: v for k, v in raw_values.items() if v is not None}
+        
+        return cls(**values)
