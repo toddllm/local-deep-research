@@ -7,10 +7,10 @@ from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
-from assistant.configuration import Configuration, SearchAPI
-from assistant.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search
-from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
-from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
+from ollama_deep_researcher.configuration import Configuration, SearchAPI
+from ollama_deep_researcher.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search
+from ollama_deep_researcher.state import SummaryState, SummaryStateInput, SummaryStateOutput
+from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
 
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
@@ -26,9 +26,15 @@ def generate_query(state: SummaryState, config: RunnableConfig):
         [SystemMessage(content=query_writer_instructions_formatted),
         HumanMessage(content=f"Generate a query for web search:")]
     )
-    query = json.loads(result.content)
+    
+    try:
+        query = json.loads(result.content)
+        search_query = query['query']
+    except (json.JSONDecodeError, KeyError):
+        # Fallback for models that don't follow the structured output format
+        search_query = result.content
 
-    return {"search_query": query['query']}
+    return {"search_query": search_query}
 
 def web_research(state: SummaryState, config: RunnableConfig):
     """ Gather information from the web """
@@ -110,25 +116,39 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
         [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
         HumanMessage(content=f"Identify a knowledge gap and generate a follow-up web search query based on our existing knowledge: {state.running_summary}")]
     )
-    follow_up_query = json.loads(result.content)
-
-    # Get the follow-up query
-    query = follow_up_query.get('follow_up_query')
-
-    # JSON mode can fail in some cases
-    if not query:
-
-        # Fallback to a placeholder query
+    
+    try:
+        follow_up_query = json.loads(result.content)
+        # Get the follow-up query
+        query = follow_up_query.get('follow_up_query')
+        
+        # JSON mode can fail in some cases
+        if not query:
+            # Fallback to a placeholder query
+            return {"search_query": f"Tell me more about {state.research_topic}"}
+        
+        return {"search_query": query}
+    except (json.JSONDecodeError, KeyError):
+        # Fallback for models that don't follow the structured output format or malformed JSON
         return {"search_query": f"Tell me more about {state.research_topic}"}
-
-    # Update search query with follow-up query
-    return {"search_query": follow_up_query['follow_up_query']}
 
 def finalize_summary(state: SummaryState):
     """ Finalize the summary """
 
-    # Format all accumulated sources into a single bulleted list
-    all_sources = "\n".join(source for source in state.sources_gathered)
+    # Deduplicate sources before joining
+    seen_sources = set()
+    unique_sources = []
+    
+    for source in state.sources_gathered:
+        # Split the source into lines and process each individually
+        for line in source.split('\n'):
+            # Only process non-empty lines
+            if line.strip() and line not in seen_sources:
+                seen_sources.add(line)
+                unique_sources.append(line)
+    
+    # Join the deduplicated sources
+    all_sources = "\n".join(unique_sources)
     state.running_summary = f"## Summary\n\n{state.running_summary}\n\n ### Sources:\n{all_sources}"
     return {"running_summary": state.running_summary}
 
@@ -136,7 +156,7 @@ def route_research(state: SummaryState, config: RunnableConfig) -> Literal["fina
     """ Route the research based on the follow-up query """
 
     configurable = Configuration.from_runnable_config(config)
-    if state.research_loop_count <= int(configurable.max_web_research_loops):
+    if state.research_loop_count <= configurable.max_web_research_loops:
         return "web_research"
     else:
         return "finalize_summary"

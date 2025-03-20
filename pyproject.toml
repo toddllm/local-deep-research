@@ -1,7 +1,7 @@
 [project]
 name = "ollama-deep-researcher"
 version = "0.0.1"
-description = "Lightweight web research and summarization assistant."
+description = "Fully local web research and summarization assistant with Ollama and LangGraph."
 authors = [
     { name = "Lance Martin" }
 ]
@@ -25,10 +25,10 @@ requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["assistant"]
+packages = ["ollama_deep_researcher"]
 
 [tool.setuptools.package-dir]
-"assistant" = "src/assistant"
+"ollama_deep_researcher" = "src/ollama_deep_researcher"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]

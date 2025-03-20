@@ -8,7 +8,6 @@ The query will gather information related to a specific topic.
 <FORMAT>
 Format your response as a JSON object with ALL three of these exact keys:
    - "query": The actual search query string
-   - "aspect": The specific aspect of the topic being researched
    - "rationale": Brief explanation of why this query is relevant
 </FORMAT>
 
@@ -16,7 +15,6 @@ Format your response as a JSON object with ALL three of these exact keys:
 Example output:
 {{
     "query": "machine learning transformer architecture explained",
-    "aspect": "technical architecture",
     "rationale": "Understanding the fundamental structure of transformer models"
 }}
 </EXAMPLE>

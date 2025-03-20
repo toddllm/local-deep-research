@@ -1,6 +1,6 @@
 import os
 import requests
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from langsmith import traceable
 from tavily import TavilyClient
 from duckduckgo_search import DDGS
@@ -149,10 +149,7 @@ def tavily_search(query, include_raw_content=True, max_results=3):
                 - content (str): Snippet/summary of the content
                 - raw_content (str): Full content of the page if available"""
      
-    api_key = os.getenv("TAVILY_API_KEY")
-    if not api_key:
-        raise ValueError("TAVILY_API_KEY environment variable is not set")
-    tavily_client = TavilyClient(api_key=api_key)
+    tavily_client = TavilyClient()
     return tavily_client.search(query, 
                          max_results=max_results, 
                          include_raw_content=include_raw_content)
