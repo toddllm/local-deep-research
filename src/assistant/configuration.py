@@ -4,7 +4,16 @@ from pydantic import BaseModel, Field
 
 from langchain_core.runnables import RunnableConfig
 
-class Configuration(BaseModel):
+from enum import Enum
+
+class SearchAPI(Enum):
+    PERPLEXITY = "perplexity"
+    TAVILY = "tavily"
+    DUCKDUCKGO = "duckduckgo"
+    SEARXNG = "searxng"
+
+@dataclass(kw_only=True)
+class Configuration:
     """The configurable fields for the research assistant."""
     max_web_research_loops: int = Field(
         default=3,
