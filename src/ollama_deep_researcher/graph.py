@@ -48,17 +48,17 @@ def generate_query(state: SummaryState, config: RunnableConfig):
         HumanMessage(content=f"Generate a query for web search:")]
     )
     
-    # Strip thinking tokens if configured
+    # Get the content
     content = result.content
-    if configurable.strip_thinking_tokens:
-        content = strip_thinking_tokens(content)
-    
-    # Parse the JSON response
+
+    # Parse the JSON response and get the query
     try:
         query = json.loads(content)
         search_query = query['query']
     except (json.JSONDecodeError, KeyError):
-        # Fallback for models that don't follow the structured output format
+        # If parsing fails or the key is not found, use a fallback query
+        if configurable.strip_thinking_tokens:
+            content = strip_thinking_tokens(content)
         search_query = content
     return {"search_query": search_query}
 
@@ -154,7 +154,7 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
             temperature=0, 
             format="json"
         )
-    else:  # Default to Ollama
+    else: # Default to Ollama
         llm_json_mode = ChatOllama(
             base_url=configurable.ollama_base_url, 
             model=configurable.local_llm, 
@@ -168,24 +168,20 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     )
     
     # Strip thinking tokens if configured
-    reflection_content = result.content
-    if configurable.strip_thinking_tokens:
-        reflection_content = strip_thinking_tokens(reflection_content)
-    
     try:
+        # Try to parse as JSON first
+        reflection_content = json.loads(result.content)
+        # Get the follow-up query
         query = reflection_content.get('follow_up_query')
-        
-        # JSON mode can fail in some cases
+        # Check if query is None or empty
         if not query:
-            # Fallback to a placeholder query
+            # Use a fallback query
             return {"search_query": f"Tell me more about {state.research_topic}"}
-        
         return {"search_query": query}
-    
-    except (json.JSONDecodeError, KeyError):
-        # Fallback for models that don't follow the structured output format or malformed JSON
+    except (json.JSONDecodeError, KeyError, AttributeError):
+        # If parsing fails or the key is not found, use a fallback query
         return {"search_query": f"Tell me more about {state.research_topic}"}
-
+        
 def finalize_summary(state: SummaryState):
     """ Finalize the summary """
 
