@@ -21,7 +21,7 @@ git clone https://github.com/langchain-ai/ollama-deep-researcher.git
 cd ollama-deep-researcher
 ```
 
-Copy the `.env.example` file to `.env` and set the environment variables to your desired values, as noted below.
+Then edit the `.env` file to customize the environment variables according to your needs. These environment variables control the model selection, search tools, and other configuration settings. When you run the application, these values will be automatically loaded via `python-dotenv` (because `langgraph.json` point to the "env" file).
 ```shell
 cp .env.example .env
 ```
