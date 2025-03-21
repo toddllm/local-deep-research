@@ -35,9 +35,9 @@ class Configuration(BaseModel):
         description="Web search API to use"
     )
     fetch_full_page: bool = Field(
-        default=False,
+        default=True,
         title="Fetch Full Page",
-        description="Whether to fetch the full page content (DuckDuckGo only)"
+        description="Include the full page content in the search results"
     )
     ollama_base_url: str = Field(
         default="http://localhost:11434/",
