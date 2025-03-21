@@ -7,12 +7,11 @@ from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
-from assistant.configuration import Configuration, SearchAPI
-from assistant.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search, searxng_search, strip_thinking_tokens
-
-from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
-from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions, get_current_date
-from assistant.lmstudio import ChatLMStudio
+from ollama_deep_researcher.configuration import Configuration, SearchAPI
+from ollama_deep_researcher.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search, searxng_search, strip_thinking_tokens, get_config_value
+from ollama_deep_researcher.state import SummaryState, SummaryStateInput, SummaryStateOutput
+from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions, get_current_date
+from ollama_deep_researcher.lmstudio import ChatLMStudio
 
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
@@ -36,7 +35,7 @@ def generate_query(state: SummaryState, config: RunnableConfig):
             temperature=0, 
             format="json"
         )
-    else:  # Default to Ollama
+    else: # Default to Ollama
         llm_json_mode = ChatOllama(
             base_url=configurable.ollama_base_url, 
             model=configurable.local_llm, 
@@ -48,16 +47,20 @@ def generate_query(state: SummaryState, config: RunnableConfig):
         [SystemMessage(content=formatted_prompt),
         HumanMessage(content=f"Generate a query for web search:")]
     )
-    print(result.content)
     
-    # Strip thinking tokens if configured
+    # Get the content
     content = result.content
-    if configurable.strip_thinking_tokens:
-        content = strip_thinking_tokens(content)
-    
-    query = json.loads(content)
 
-    return {"search_query": query['query']}
+    # Parse the JSON response and get the query
+    try:
+        query = json.loads(content)
+        search_query = query['query']
+    except (json.JSONDecodeError, KeyError):
+        # If parsing fails or the key is not found, use a fallback query
+        if configurable.strip_thinking_tokens:
+            content = strip_thinking_tokens(content)
+        search_query = content
+    return {"search_query": search_query}
 
 def web_research(state: SummaryState, config: RunnableConfig):
     """ Gather information from the web """
@@ -65,13 +68,8 @@ def web_research(state: SummaryState, config: RunnableConfig):
     # Configure
     configurable = Configuration.from_runnable_config(config)
 
-    # Handle both cases for search_api:
-    # 1. When selected in Studio UI -> returns a string (e.g. "tavily")
-    # 2. When using default -> returns an Enum (e.g. SearchAPI.TAVILY)
-    if isinstance(configurable.search_api, str):
-        search_api = configurable.search_api
-    else:
-        search_api = configurable.search_api.value
+    # Get the search API
+    search_api = get_config_value(configurable.search_api)
 
     # Search the web
     if search_api == "tavily":
@@ -135,14 +133,10 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
         HumanMessage(content=human_message_content)]
     )
 
+    # Strip thinking tokens if configured
     running_summary = result.content
-
-    # TODO: This is a hack to remove the <think> tags w/ Deepseek models
-    # It appears very challenging to prompt them out of the responses
-    while "<think>" in running_summary and "</think>" in running_summary:
-        start = running_summary.find("<think>")
-        end = running_summary.find("</think>") + len("</think>")
-        running_summary = running_summary[:start] + running_summary[end:]
+    if configurable.strip_thinking_tokens:
+        running_summary = strip_thinking_tokens(running_summary)
 
     return {"running_summary": running_summary}
 
@@ -160,7 +154,7 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
             temperature=0, 
             format="json"
         )
-    else:  # Default to Ollama
+    else: # Default to Ollama
         llm_json_mode = ChatOllama(
             base_url=configurable.ollama_base_url, 
             model=configurable.local_llm, 
@@ -174,28 +168,37 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     )
     
     # Strip thinking tokens if configured
-    content = result.content
-    if configurable.strip_thinking_tokens:
-        content = strip_thinking_tokens(content)
-    
-    follow_up_query = json.loads(content)
-
-    # Get the follow-up query
-    query = follow_up_query.get('follow_up_query')
-
-    # JSON mode can fail in some cases
-    if not query:
-        # Fallback to a placeholder query
+    try:
+        # Try to parse as JSON first
+        reflection_content = json.loads(result.content)
+        # Get the follow-up query
+        query = reflection_content.get('follow_up_query')
+        # Check if query is None or empty
+        if not query:
+            # Use a fallback query
+            return {"search_query": f"Tell me more about {state.research_topic}"}
+        return {"search_query": query}
+    except (json.JSONDecodeError, KeyError, AttributeError):
+        # If parsing fails or the key is not found, use a fallback query
         return {"search_query": f"Tell me more about {state.research_topic}"}
-
-    # Update search query with follow-up query
-    return {"search_query": follow_up_query['follow_up_query']}
-
+        
 def finalize_summary(state: SummaryState):
     """ Finalize the summary """
 
-    # Format all accumulated sources into a single bulleted list
-    all_sources = "\n".join(source for source in state.sources_gathered)
+    # Deduplicate sources before joining
+    seen_sources = set()
+    unique_sources = []
+    
+    for source in state.sources_gathered:
+        # Split the source into lines and process each individually
+        for line in source.split('\n'):
+            # Only process non-empty lines
+            if line.strip() and line not in seen_sources:
+                seen_sources.add(line)
+                unique_sources.append(line)
+    
+    # Join the deduplicated sources
+    all_sources = "\n".join(unique_sources)
     state.running_summary = f"## Summary\n\n{state.running_summary}\n\n ### Sources:\n{all_sources}"
     return {"running_summary": state.running_summary}
 
@@ -203,7 +206,7 @@ def route_research(state: SummaryState, config: RunnableConfig) -> Literal["fina
     """ Route the research based on the follow-up query """
 
     configurable = Configuration.from_runnable_config(config)
-    if state.research_loop_count <= int(configurable.max_web_research_loops):
+    if state.research_loop_count <= configurable.max_web_research_loops:
         return "web_research"
     else:
         return "finalize_summary"

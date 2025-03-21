@@ -1,10 +1,28 @@
 import os
 import requests
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from langsmith import traceable
 from tavily import TavilyClient
 from duckduckgo_search import DDGS
 from langchain_community.utilities import SearxSearchWrapper
+
+def get_config_value(value):
+    """
+    Helper function to handle both string and enum cases of configuration values.
+    
+    Args:
+        value: The configuration value to process. Can be a string or an Enum.
+    
+    Returns:
+        str: The string representation of the value.
+        
+    Examples:
+        >>> get_config_value("tavily")
+        'tavily'
+        >>> get_config_value(SearchAPI.TAVILY)
+        'tavily'
+    """
+    return value if isinstance(value, str) else value.value
 
 def strip_thinking_tokens(text: str) -> str:
     """Remove <think> tags and their content from the text.
@@ -15,6 +33,7 @@ def strip_thinking_tokens(text: str) -> str:
     Returns:
         str: The text with thinking tokens removed
     """
+
     while "<think>" in text and "</think>" in text:
         start = text.find("<think>")
         end = text.find("</think>") + len("</think>")
@@ -212,10 +231,7 @@ def tavily_search(query, include_raw_content=True, max_results=3):
                 - content (str): Snippet/summary of the content
                 - raw_content (str): Full content of the page if available"""
      
-    api_key = os.getenv("TAVILY_API_KEY")
-    if not api_key:
-        raise ValueError("TAVILY_API_KEY environment variable is not set")
-    tavily_client = TavilyClient(api_key=api_key)
+    tavily_client = TavilyClient()
     return tavily_client.search(query, 
                          max_results=max_results, 
                          include_raw_content=include_raw_content)

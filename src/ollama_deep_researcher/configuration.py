@@ -1,10 +1,9 @@
 import os
-from typing import Any, Optional, Dict, List, Literal
+from enum import Enum
 from pydantic import BaseModel, Field
+from typing import Any, Optional, Literal
 
 from langchain_core.runnables import RunnableConfig
-
-from enum import Enum
 
 class SearchAPI(Enum):
     PERPLEXITY = "perplexity"
@@ -12,9 +11,9 @@ class SearchAPI(Enum):
     DUCKDUCKGO = "duckduckgo"
     SEARXNG = "searxng"
 
-@dataclass(kw_only=True)
-class Configuration:
+class Configuration(BaseModel):
     """The configurable fields for the research assistant."""
+
     max_web_research_loops: int = Field(
         default=3,
         title="Research Depth",
@@ -51,7 +50,7 @@ class Configuration:
         description="Base URL for LMStudio OpenAI-compatible API"
     )
     strip_thinking_tokens: bool = Field(
-        default=False,
+        default=True,
         title="Strip Thinking Tokens",
         description="Whether to strip <think> tokens from model responses"
     )
