@@ -1,17 +1,21 @@
 import os
+import httpx
 import requests
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union, Optional
+
+from markdownify import markdownify
 from langsmith import traceable
 from tavily import TavilyClient
 from duckduckgo_search import DDGS
+
 from langchain_community.utilities import SearxSearchWrapper
 
-def get_config_value(value):
+def get_config_value(value: Any) -> str:
     """
-    Helper function to handle both string and enum cases of configuration values.
+    Convert configuration values to string format, handling both string and enum types.
     
     Args:
-        value: The configuration value to process. Can be a string or an Enum.
+        value (Any): The configuration value to process. Can be a string or an Enum.
     
     Returns:
         str: The string representation of the value.
@@ -25,34 +29,46 @@ def get_config_value(value):
     return value if isinstance(value, str) else value.value
 
 def strip_thinking_tokens(text: str) -> str:
-    """Remove <think> tags and their content from the text.
+    """
+    Remove <think> and </think> tags and their content from the text.
+    
+    Iteratively removes all occurrences of content enclosed in thinking tokens.
     
     Args:
         text (str): The text to process
         
     Returns:
-        str: The text with thinking tokens removed
+        str: The text with thinking tokens and their content removed
     """
-
     while "<think>" in text and "</think>" in text:
         start = text.find("<think>")
         end = text.find("</think>") + len("</think>")
         text = text[:start] + text[end:]
     return text
 
-def deduplicate_and_format_sources(search_response, max_tokens_per_source, include_raw_content=False):
+def deduplicate_and_format_sources(
+    search_response: Union[Dict[str, Any], List[Dict[str, Any]]], 
+    max_tokens_per_source: int, 
+    fetch_full_page: bool = False
+) -> str:
     """
-    Takes either a single search response or list of responses from search APIs and formats them.
-    Limits the raw_content to approximately max_tokens_per_source.
-    include_raw_content specifies whether to include the raw_content from Tavily in the formatted string.
+    Format and deduplicate search responses from various search APIs.
+    
+    Takes either a single search response or list of responses from search APIs,
+    deduplicates them by URL, and formats them into a structured string.
     
     Args:
-        search_response: Either:
+        search_response (Union[Dict[str, Any], List[Dict[str, Any]]]): Either:
             - A dict with a 'results' key containing a list of search results
             - A list of dicts, each containing search results
+        max_tokens_per_source (int): Maximum number of tokens to include for each source's content
+        fetch_full_page (bool, optional): Whether to include the full page content. Defaults to False.
             
     Returns:
         str: Formatted string with deduplicated sources
+        
+    Raises:
+        ValueError: If input is neither a dict with 'results' key nor a list of search results
     """
     # Convert input to list of results
     if isinstance(search_response, dict):
@@ -76,10 +92,10 @@ def deduplicate_and_format_sources(search_response, max_tokens_per_source, inclu
     # Format output
     formatted_text = "Sources:\n\n"
     for i, source in enumerate(unique_sources.values(), 1):
-        formatted_text += f"Source {source['title']}:\n===\n"
+        formatted_text += f"Source: {source['title']}\n===\n"
         formatted_text += f"URL: {source['url']}\n===\n"
         formatted_text += f"Most relevant content from source: {source['content']}\n===\n"
-        if include_raw_content:
+        if fetch_full_page:
             # Using rough estimate of 4 characters per token
             char_limit = max_tokens_per_source * 4
             # Handle None raw_content
@@ -93,47 +109,67 @@ def deduplicate_and_format_sources(search_response, max_tokens_per_source, inclu
                 
     return formatted_text.strip()
 
-def format_sources(search_results):
-    """Format search results into a bullet-point list of sources.
+def format_sources(search_results: Dict[str, Any]) -> str:
+    """
+    Format search results into a bullet-point list of sources with URLs.
+    
+    Creates a simple bulleted list of search results with title and URL for each source.
     
     Args:
-        search_results (dict): Tavily search response containing results
+        search_results (Dict[str, Any]): Search response containing a 'results' key with
+                                        a list of search result objects
         
     Returns:
-        str: Formatted string with sources and their URLs
+        str: Formatted string with sources as bullet points in the format "* title : url"
     """
     return '\n'.join(
         f"* {source['title']} : {source['url']}"
         for source in search_results['results']
     )
-def fetch_raw_content(url):
-    try:
-        # Try to fetch the full page content using curl
-        import urllib.request
-        from bs4 import BeautifulSoup
-        response = urllib.request.urlopen(url)
-        html = response.read()
-        soup = BeautifulSoup(html, 'html.parser')
-        return soup.get_text()
+
+def fetch_raw_content(url: str) -> Optional[str]:
+    """
+    Fetch HTML content from a URL and convert it to markdown format.
+    
+    Uses a 10-second timeout to avoid hanging on slow sites or large pages.
+    
+    Args:
+        url (str): The URL to fetch content from
         
+    Returns:
+        Optional[str]: The fetched content converted to markdown if successful,
+                      None if any error occurs during fetching or conversion
+    """
+    try:                
+        # Create a client with reasonable timeout
+        with httpx.Client(timeout=10.0) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            return markdownify(response.text)
     except Exception as e:
         print(f"Warning: Failed to fetch full page content for {url}: {str(e)}")
+        return None
 
 @traceable
-def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = False) -> Dict[str, List[Dict[str, str]]]:
-    """Search the web using DuckDuckGo.
+def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = False) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Search the web using DuckDuckGo and return formatted results.
+    
+    Uses the DDGS library to perform web searches through DuckDuckGo.
     
     Args:
         query (str): The search query to execute
-        max_results (int): Maximum number of results to return
-        
+        max_results (int, optional): Maximum number of results to return. Defaults to 3.
+        fetch_full_page (bool, optional): Whether to fetch full page content from result URLs. 
+                                         Defaults to False.
     Returns:
-        dict: Search response containing:
+        Dict[str, List[Dict[str, Any]]]: Search response containing:
             - results (list): List of search result dictionaries, each containing:
                 - title (str): Title of the search result
                 - url (str): URL of the search result
                 - content (str): Snippet/summary of the content
-                - raw_content (str): Same as content since DDG doesn't provide full page content
+                - raw_content (str or None): Full page content if fetch_full_page is True,
+                                            otherwise same as content
     """
     try:
         with DDGS() as ddgs:
@@ -169,21 +205,28 @@ def duckduckgo_search(query: str, max_results: int = 3, fetch_full_page: bool = 
         return {"results": []}
 
 @traceable
-def searxng_search(query: str, max_results: int = 3, fetch_full_page = False):
-    """Search the web using SearXNG.
+def searxng_search(query: str, max_results: int = 3, fetch_full_page: bool = False) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Search the web using SearXNG and return formatted results.
+    
+    Uses the SearxSearchWrapper to perform searches through a SearXNG instance.
+    The SearXNG host URL is read from the SEARXNG_URL environment variable
+    or defaults to http://localhost:8888.
     
     Args:
         query (str): The search query to execute
-        max_results (int): Maximum number of results to return
-        fetch_full_page: Fetch page content from results urls
+        max_results (int, optional): Maximum number of results to return. Defaults to 3.
+        fetch_full_page (bool, optional): Whether to fetch full page content from result URLs.
+                                         Defaults to False.
         
     Returns:
-        dict: Search response containing:
+        Dict[str, List[Dict[str, Any]]]: Search response containing:
             - results (list): List of search result dictionaries, each containing:
                 - title (str): Title of the search result
                 - url (str): URL of the search result
                 - content (str): Snippet/summary of the content
-                - raw_content (str): Same as content since SearXNG doesn't provide full page content, unless fetch_full_page is true
+                - raw_content (str or None): Full page content if fetch_full_page is True,
+                                           otherwise same as content
     """
     host=os.environ.get("SEARXNG_URL", "http://localhost:8888")
     s = SearxSearchWrapper(searx_host=host)
@@ -213,44 +256,59 @@ def searxng_search(query: str, max_results: int = 3, fetch_full_page = False):
         results.append(result)
     return {"results": results}
     
-
 @traceable
-def tavily_search(query, include_raw_content=True, max_results=3):
-    """ Search the web using the Tavily API.
+def tavily_search(query: str, fetch_full_page: bool = True, max_results: int = 3) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Search the web using the Tavily API and return formatted results.
+    
+    Uses the TavilyClient to perform searches. Tavily API key must be configured
+    in the environment.
     
     Args:
         query (str): The search query to execute
-        include_raw_content (bool): Whether to include the raw_content from Tavily in the formatted string
-        max_results (int): Maximum number of results to return
+        fetch_full_page (bool, optional): Whether to include raw content from sources.
+                                         Defaults to True.
+        max_results (int, optional): Maximum number of results to return. Defaults to 3.
         
     Returns:
-        dict: Search response containing:
+        Dict[str, List[Dict[str, Any]]]: Search response containing:
             - results (list): List of search result dictionaries, each containing:
                 - title (str): Title of the search result
                 - url (str): URL of the search result
                 - content (str): Snippet/summary of the content
-                - raw_content (str): Full content of the page if available"""
+                - raw_content (str or None): Full content of the page if available and 
+                                            fetch_full_page is True
+    """
      
     tavily_client = TavilyClient()
     return tavily_client.search(query, 
                          max_results=max_results, 
-                         include_raw_content=include_raw_content)
+                         include_raw_content=fetch_full_page)
 
 @traceable
-def perplexity_search(query: str, perplexity_search_loop_count: int) -> Dict[str, Any]:
-    """Search the web using the Perplexity API.
+def perplexity_search(query: str, perplexity_search_loop_count: int = 0) -> Dict[str, Any]:
+    """
+    Search the web using the Perplexity API and return formatted results.
+    
+    Uses the Perplexity API to perform searches with the 'sonar-pro' model.
+    Requires a PERPLEXITY_API_KEY environment variable to be set.
     
     Args:
         query (str): The search query to execute
-        perplexity_search_loop_count (int): The loop step for perplexity search (starts at 0)
+        perplexity_search_loop_count (int, optional): The loop step for perplexity search
+                                                     (used for source labeling). Defaults to 0.
   
     Returns:
-        dict: Search response containing:
+        Dict[str, Any]: Search response containing:
             - results (list): List of search result dictionaries, each containing:
-                - title (str): Title of the search result
-                - url (str): URL of the search result
-                - content (str): Snippet/summary of the content
-                - raw_content (str): Full content of the page if available
+                - title (str): Title of the search result (includes search counter)
+                - url (str): URL of the citation source
+                - content (str): Content of the response or reference to main content
+                - raw_content (str or None): Full content for the first source, None for additional
+                                            citation sources
+                                            
+    Raises:
+        requests.exceptions.HTTPError: If the API request fails
     """
 
     headers = {

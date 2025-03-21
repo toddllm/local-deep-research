@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
 
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.messages import (
@@ -56,7 +56,9 @@ class ChatLMStudio(ChatOpenAI):
         run_manager: Optional[CallbackManagerForLLMRun] = None,
         **kwargs: Any,
     ) -> ChatResult:
+        
         """Generate a chat response using LMStudio's OpenAI-compatible API."""
+        
         if self.format == "json":
             # Set response_format for JSON mode
             kwargs["response_format"] = {"type": "json_object"}

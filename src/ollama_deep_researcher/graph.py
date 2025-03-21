@@ -15,7 +15,18 @@ from ollama_deep_researcher.lmstudio import ChatLMStudio
 
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
-    """ Generate a query for web search """
+    """LangGraph node that generates a search query based on the research topic.
+    
+    Uses an LLM to create an optimized search query for web research based on
+    the user's research topic. Supports both LMStudio and Ollama as LLM providers.
+    
+    Args:
+        state: Current graph state containing the research topic
+        config: Configuration for the runnable, including LLM provider settings
+        
+    Returns:
+        Dictionary with state update, including search_query key containing the generated query
+    """
 
     # Format the prompt
     current_date = get_current_date()
@@ -63,7 +74,18 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     return {"search_query": search_query}
 
 def web_research(state: SummaryState, config: RunnableConfig):
-    """ Gather information from the web """
+    """LangGraph node that performs web research using the generated search query.
+    
+    Executes a web search using the configured search API (tavily, perplexity, 
+    duckduckgo, or searxng) and formats the results for further processing.
+    
+    Args:
+        state: Current graph state containing the search query and research loop count
+        config: Configuration for the runnable, including search API settings
+        
+    Returns:
+        Dictionary with state update, including sources_gathered, research_loop_count, and web_research_results
+    """
 
     # Configure
     configurable = Configuration.from_runnable_config(config)
@@ -73,24 +95,36 @@ def web_research(state: SummaryState, config: RunnableConfig):
 
     # Search the web
     if search_api == "tavily":
-        search_results = tavily_search(state.search_query, include_raw_content=True, max_results=1)
-        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=True)
+        search_results = tavily_search(state.search_query, fetch_full_page=configurable.fetch_full_page, max_results=1)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, fetch_full_page=configurable.fetch_full_page)
     elif search_api == "perplexity":
         search_results = perplexity_search(state.search_query, state.research_loop_count)
-        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=False)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, fetch_full_page=configurable.fetch_full_page)
     elif search_api == "duckduckgo":
         search_results = duckduckgo_search(state.search_query, max_results=3, fetch_full_page=configurable.fetch_full_page)
-        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=True)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, fetch_full_page=configurable.fetch_full_page)
     elif search_api == "searxng":
         search_results = searxng_search(state.search_query, max_results=3, fetch_full_page=configurable.fetch_full_page)
-        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, include_raw_content=False)
+        search_str = deduplicate_and_format_sources(search_results, max_tokens_per_source=1000, fetch_full_page=configurable.fetch_full_page)
     else:
         raise ValueError(f"Unsupported search API: {configurable.search_api}")
 
     return {"sources_gathered": [format_sources(search_results)], "research_loop_count": state.research_loop_count + 1, "web_research_results": [search_str]}
 
 def summarize_sources(state: SummaryState, config: RunnableConfig):
-    """ Summarize the gathered sources """
+    """LangGraph node that summarizes web research results.
+    
+    Uses an LLM to create or update a running summary based on the newest web research 
+    results, integrating them with any existing summary.
+    
+    Args:
+        state: Current graph state containing research topic, running summary,
+              and web research results
+        config: Configuration for the runnable, including LLM provider settings
+        
+    Returns:
+        Dictionary with state update, including running_summary key containing the updated summary
+    """
 
     # Existing summary
     existing_summary = state.running_summary
@@ -141,7 +175,19 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
     return {"running_summary": running_summary}
 
 def reflect_on_summary(state: SummaryState, config: RunnableConfig):
-    """ Reflect on the summary and generate a follow-up query """
+    """LangGraph node that identifies knowledge gaps and generates follow-up queries.
+    
+    Analyzes the current summary to identify areas for further research and generates
+    a new search query to address those gaps. Uses structured output to extract
+    the follow-up query in JSON format.
+    
+    Args:
+        state: Current graph state containing the running summary and research topic
+        config: Configuration for the runnable, including LLM provider settings
+        
+    Returns:
+        Dictionary with state update, including search_query key containing the generated follow-up query
+    """
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
@@ -164,7 +210,7 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     
     result = llm_json_mode.invoke(
         [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
-        HumanMessage(content=f"Identify a knowledge gap and generate a follow-up web search query based on our existing knowledge: {state.running_summary}")]
+        HumanMessage(content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:")]
     )
     
     # Strip thinking tokens if configured
@@ -183,7 +229,18 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
         return {"search_query": f"Tell me more about {state.research_topic}"}
         
 def finalize_summary(state: SummaryState):
-    """ Finalize the summary """
+    """LangGraph node that finalizes the research summary.
+    
+    Prepares the final output by deduplicating and formatting sources, then
+    combining them with the running summary to create a well-structured
+    research report with proper citations.
+    
+    Args:
+        state: Current graph state containing the running summary and sources gathered
+        
+    Returns:
+        Dictionary with state update, including running_summary key containing the formatted final summary with sources
+    """
 
     # Deduplicate sources before joining
     seen_sources = set()
@@ -203,7 +260,18 @@ def finalize_summary(state: SummaryState):
     return {"running_summary": state.running_summary}
 
 def route_research(state: SummaryState, config: RunnableConfig) -> Literal["finalize_summary", "web_research"]:
-    """ Route the research based on the follow-up query """
+    """LangGraph routing function that determines the next step in the research flow.
+    
+    Controls the research loop by deciding whether to continue gathering information
+    or to finalize the summary based on the configured maximum number of research loops.
+    
+    Args:
+        state: Current graph state containing the research loop count
+        config: Configuration for the runnable, including max_web_research_loops setting
+        
+    Returns:
+        String literal indicating the next node to visit ("web_research" or "finalize_summary")
+    """
 
     configurable = Configuration.from_runnable_config(config)
     if state.research_loop_count <= configurable.max_web_research_loops:
