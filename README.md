@@ -17,8 +17,8 @@ See it in action or build it yourself? Check out these helpful video tutorials:
 
 Clone the repository:
 ```shell
-git clone https://github.com/langchain-ai/ollama-deep-researcher.git
-cd ollama-deep-researcher
+git clone https://github.com/langchain-ai/local-deep-researcher.git
+cd local-deep-researcher
 ```
 
 Then edit the `.env` file to customize the environment variables according to your needs. These environment variables control the model selection, search tools, and other configuration settings. When you run the application, these values will be automatically loaded via `python-dotenv` (because `langgraph.json` point to the "env" file).
