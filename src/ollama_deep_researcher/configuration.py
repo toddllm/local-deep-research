@@ -29,7 +29,7 @@ class Configuration(BaseModel):
         title="LLM Provider",
         description="Provider for the LLM (Ollama or LMStudio)"
     )
-    search_api: Literal["perplexity", "tavily", "duckduckgo"] = Field(
+    search_api: Literal["perplexity", "tavily", "duckduckgo", "searxng"] = Field(
         default="duckduckgo",
         title="Search API",
         description="Web search API to use"
