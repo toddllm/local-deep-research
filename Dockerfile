@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM python:3.11-slim
+FROM python:3.11-slim-buster
 
 WORKDIR /app
 
@@ -6,15 +6,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     build-essential \
-    python3-dev \
-    libssl-dev \
-    libffi-dev \
-    rustc \
-    cargo \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv package manager (use pip for safer cross-arch install)
-RUN pip install uv
+# 1) Install uv package manager
+#    By default, uv installs to ~/.local/bin. We update PATH so uv is recognized.
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
 # 2) Copy the repository content
