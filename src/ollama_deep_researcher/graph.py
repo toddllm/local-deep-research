@@ -135,14 +135,14 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
     # Build the human message
     if existing_summary:
         human_message_content = (
-            f"<User Input> \n {state.research_topic} \n <User Input>\n\n"
             f"<Existing Summary> \n {existing_summary} \n <Existing Summary>\n\n"
-            f"<New Search Results> \n {most_recent_web_research} \n <New Search Results>"
+            f"<New Context> \n {most_recent_web_research} \n <New Context>"
+            f"Update the Existing Summary with the New Context on this topic: \n <User Input> \n {state.research_topic} \n <User Input>\n\n"
         )
     else:
         human_message_content = (
-            f"<User Input> \n {state.research_topic} \n <User Input>\n\n"
-            f"<Search Results> \n {most_recent_web_research} \n <Search Results>"
+            f"<Context> \n {most_recent_web_research} \n <Context>"
+            f"Create a Summary using the Context on this topic: \n <User Input> \n {state.research_topic} \n <User Input>\n\n"
         )
 
     # Run the LLM
@@ -256,7 +256,7 @@ def finalize_summary(state: SummaryState):
     
     # Join the deduplicated sources
     all_sources = "\n".join(unique_sources)
-    state.running_summary = f"## Summary\n\n{state.running_summary}\n\n ### Sources:\n{all_sources}"
+    state.running_summary = f"## Summary\n{state.running_summary}\n\n ### Sources:\n{all_sources}"
     return {"running_summary": state.running_summary}
 
 def route_research(state: SummaryState, config: RunnableConfig) -> Literal["finalize_summary", "web_research"]:
