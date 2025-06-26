@@ -198,7 +198,7 @@ Run the container:
 $ docker run --rm -it -p 2024:2024 \
   -e SEARCH_API="tavily" \ 
   -e TAVILY_API_KEY="tvly-***YOUR_KEY_HERE***" \
-  -e LLM_PROVIDER=ollama
+  -e LLM_PROVIDER=ollama \
   -e OLLAMA_BASE_URL="http://host.docker.internal:11434/" \
   -e LOCAL_LLM="llama3.2" \  
   local-deep-researcher
