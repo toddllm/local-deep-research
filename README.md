@@ -9,7 +9,7 @@ Short summary video:
 
 ## 🔥 Updates 
 
-* 8/6/25: Added support for tool calling and [GPT-oss:20b](https://openai.com/index/introducing-gpt-oss/). 
+* 8/6/25: Added support for tool calling and [gpt-oss](https://openai.com/index/introducing-gpt-oss/). 
 
 ## 📺 Video Tutorials
 

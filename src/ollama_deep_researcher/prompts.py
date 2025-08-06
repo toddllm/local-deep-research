@@ -1,10 +1,12 @@
 from datetime import datetime
 
+
 # Get current date in a readable format
 def get_current_date():
     return datetime.now().strftime("%B %d, %Y")
 
-query_writer_instructions="""Your goal is to generate a targeted web search query.
+
+query_writer_instructions = """Your goal is to generate a targeted web search query.
 
 <CONTEXT>
 Current date: {current_date}
@@ -39,7 +41,7 @@ Call the Query tool to format your response with the following keys:
 
 Call the Query Tool to generate a query for this request:"""
 
-summarizer_instructions="""
+summarizer_instructions = """
 <GOAL>
 Generate a high-quality summary of the provided context.
 </GOAL>
