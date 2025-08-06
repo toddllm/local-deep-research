@@ -11,6 +11,8 @@ Short summary video:
 
 * 8/6/25: Added support for tool calling and [gpt-oss](https://openai.com/index/introducing-gpt-oss/). 
 
+> ⚠️ **WARNING (8/6/25)**: The `gpt-oss` models do not support JSON mode in Ollama. Select `use_tool_calling` in the configuration to use tool calling instead of JSON mode.
+
 ## 📺 Video Tutorials
 
 See it in action or build it yourself? Check out these helpful video tutorials:
