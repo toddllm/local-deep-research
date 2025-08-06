@@ -15,21 +15,29 @@ Please ensure your queries account for the most current information available as
 {research_topic}
 </TOPIC>
 
-<FORMAT>
-Format your response as a JSON object with ALL three of these exact keys:
-   - "query": The actual search query string
-   - "rationale": Brief explanation of why this query is relevant
-</FORMAT>
-
 <EXAMPLE>
 Example output:
 {{
     "query": "machine learning transformer architecture explained",
     "rationale": "Understanding the fundamental structure of transformer models"
 }}
-</EXAMPLE>
+</EXAMPLE>"""
+
+json_mode_query_instructions = """<FORMAT>
+Format your response as a JSON object with ALL three of these exact keys:
+- "query": The actual search query string
+- "rationale": Brief explanation of why this query is relevant
+</FORMAT>
 
 Provide your response in JSON format:"""
+
+tool_calling_query_instructions = """<INSTRUCTIONS   >
+Call the Query tool to format your response with the following keys:
+   - "query": The actual search query string
+   - "rationale": Brief explanation of why this query is relevant
+</INSTRUCTIONS>
+
+Call the Query Tool to generate a query for this request:"""
 
 summarizer_instructions="""
 <GOAL>

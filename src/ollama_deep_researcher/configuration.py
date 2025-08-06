@@ -54,6 +54,11 @@ class Configuration(BaseModel):
         title="Strip Thinking Tokens",
         description="Whether to strip <think> tokens from model responses"
     )
+    use_tool_calling: bool = Field(
+        default=False,
+        title="Use Tool Calling",
+        description="Use tool calling instead of JSON mode for structured output"
+    )
 
     @classmethod
     def from_runnable_config(

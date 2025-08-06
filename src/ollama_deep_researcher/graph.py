@@ -1,17 +1,59 @@
 import json
 
+from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph
 
 from ollama_deep_researcher.configuration import Configuration, SearchAPI
 from ollama_deep_researcher.utils import deduplicate_and_format_sources, tavily_search, format_sources, perplexity_search, duckduckgo_search, searxng_search, strip_thinking_tokens, get_config_value
 from ollama_deep_researcher.state import SummaryState, SummaryStateInput, SummaryStateOutput
-from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions, get_current_date
+from ollama_deep_researcher.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions, get_current_date, json_mode_query_instructions, tool_calling_query_instructions
 from ollama_deep_researcher.lmstudio import ChatLMStudio
+
+def get_llm(configurable: Configuration):
+    """Helper function to initialize LLM based on configuration.
+    
+    Uses JSON mode if use_tool_calling is False, otherwise regular mode for tool calling.
+    
+    Args:
+        configurable: Configuration object containing LLM settings
+        
+    Returns:
+        Configured LLM instance
+    """
+    if configurable.llm_provider == "lmstudio":
+        if configurable.use_tool_calling:
+            return ChatLMStudio(
+                base_url=configurable.lmstudio_base_url, 
+                model=configurable.local_llm, 
+                temperature=0
+            )
+        else:
+            return ChatLMStudio(
+                base_url=configurable.lmstudio_base_url, 
+                model=configurable.local_llm, 
+                temperature=0, 
+                format="json"
+            )
+    else:  # Default to Ollama
+        if configurable.use_tool_calling:
+            return ChatOllama(
+                base_url=configurable.ollama_base_url, 
+                model=configurable.local_llm, 
+                temperature=0
+            )
+        else:
+            return ChatOllama(
+                base_url=configurable.ollama_base_url, 
+                model=configurable.local_llm, 
+                temperature=0, 
+                format="json"
+            )
 
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
@@ -38,39 +80,48 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
     
-    # Choose the appropriate LLM based on the provider
-    if configurable.llm_provider == "lmstudio":
-        llm_json_mode = ChatLMStudio(
-            base_url=configurable.lmstudio_base_url, 
-            model=configurable.local_llm, 
-            temperature=0, 
-            format="json"
-        )
-    else: # Default to Ollama
-        llm_json_mode = ChatOllama(
-            base_url=configurable.ollama_base_url, 
-            model=configurable.local_llm, 
-            temperature=0, 
-            format="json"
-        )
+    if configurable.use_tool_calling:
     
-    result = llm_json_mode.invoke(
-        [SystemMessage(content=formatted_prompt),
-        HumanMessage(content=f"Generate a query for web search:")]
-    )
-    
-    # Get the content
-    content = result.content
+        @tool
+        class Query(BaseModel):
+            """
+            This tool is used to generate a query for web search.
+            """
+            query: str = Field(description="The actual search query string")
+            rationale: str = Field(description="Brief explanation of why this query is relevant")
 
-    # Parse the JSON response and get the query
-    try:
-        query = json.loads(content)
+        llm = get_llm(configurable).bind_tools([Query])
+
+        result = llm.invoke(
+            [SystemMessage(content=formatted_prompt+tool_calling_query_instructions),
+            HumanMessage(content=f"Generate a query for web search:")]
+        )
+
+        query = result.tool_calls[0]['args']
         search_query = query['query']
-    except (json.JSONDecodeError, KeyError):
-        # If parsing fails or the key is not found, use a fallback query
-        if configurable.strip_thinking_tokens:
-            content = strip_thinking_tokens(content)
-        search_query = content
+    
+    else:
+        # Use JSON mode
+        llm = get_llm(configurable)
+        
+        result = llm.invoke(
+            [SystemMessage(content=formatted_prompt+json_mode_query_instructions),
+            HumanMessage(content=f"Generate a query for web search:")]
+        )
+    
+        # Get the content
+        content = result.content
+
+        # Parse the JSON response and get the query
+        try:
+            query = json.loads(content)
+            search_query = query['query']
+        except (json.JSONDecodeError, KeyError):
+            # If parsing fails or the key is not found, use a fallback query
+            if configurable.strip_thinking_tokens:
+                content = strip_thinking_tokens(content)
+            search_query = content
+
     return {"search_query": search_query}
 
 def web_research(state: SummaryState, config: RunnableConfig):
@@ -148,7 +199,7 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
     # Run the LLM
     configurable = Configuration.from_runnable_config(config)
     
-    # Choose the appropriate LLM based on the provider
+    # For summarization, we don't need structured output, so always use regular mode
     if configurable.llm_provider == "lmstudio":
         llm = ChatLMStudio(
             base_url=configurable.lmstudio_base_url, 
@@ -192,41 +243,53 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
     
-    # Choose the appropriate LLM based on the provider
-    if configurable.llm_provider == "lmstudio":
-        llm_json_mode = ChatLMStudio(
-            base_url=configurable.lmstudio_base_url, 
-            model=configurable.local_llm, 
-            temperature=0, 
-            format="json"
+    if configurable.use_tool_calling:
+
+        @tool
+        class FollowUpQuery(BaseModel):
+            """
+            This tool is used to generate a follow-up query to address a knowledge gap.
+            """
+            follow_up_query: str = Field(description="Write a specific question to address this gap")
+            knowledge_gap: str = Field(description="Describe what information is missing or needs clarification")
+
+        llm = get_llm(configurable).bind_tools([FollowUpQuery])
+
+        result = llm.invoke(
+            [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
+            HumanMessage(content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:")]
         )
-    else: # Default to Ollama
-        llm_json_mode = ChatOllama(
-            base_url=configurable.ollama_base_url, 
-            model=configurable.local_llm, 
-            temperature=0, 
-            format="json"
-        )
-    
-    result = llm_json_mode.invoke(
-        [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
-        HumanMessage(content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:")]
-    )
-    
-    # Strip thinking tokens if configured
-    try:
-        # Try to parse as JSON first
-        reflection_content = json.loads(result.content)
-        # Get the follow-up query
-        query = reflection_content.get('follow_up_query')
-        # Check if query is None or empty
-        if not query:
-            # Use a fallback query
+
+        try:
+            query_data = result.tool_calls[0]['args']
+            search_query = query_data['follow_up_query']
+            return {"search_query": search_query}
+        except (IndexError, KeyError):
             return {"search_query": f"Tell me more about {state.research_topic}"}
-        return {"search_query": query}
-    except (json.JSONDecodeError, KeyError, AttributeError):
-        # If parsing fails or the key is not found, use a fallback query
-        return {"search_query": f"Tell me more about {state.research_topic}"}
+    
+    else:
+        # Use JSON mode
+        llm = get_llm(configurable)
+        
+        result = llm.invoke(
+            [SystemMessage(content=reflection_instructions.format(research_topic=state.research_topic)),
+            HumanMessage(content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:")]
+        )
+        
+        # Strip thinking tokens if configured
+        try:
+            # Try to parse as JSON first
+            reflection_content = json.loads(result.content)
+            # Get the follow-up query
+            query = reflection_content.get('follow_up_query')
+            # Check if query is None or empty
+            if not query:
+                # Use a fallback query
+                return {"search_query": f"Tell me more about {state.research_topic}"}
+            return {"search_query": query}
+        except (json.JSONDecodeError, KeyError, AttributeError):
+            # If parsing fails or the key is not found, use a fallback query
+            return {"search_query": f"Tell me more about {state.research_topic}"}
         
 def finalize_summary(state: SummaryState):
     """LangGraph node that finalizes the research summary.
