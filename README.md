@@ -7,6 +7,10 @@ Local Deep Researcher is a fully local web research assistant that uses any LLM 
 Short summary video:
 <video src="https://github.com/user-attachments/assets/02084902-f067-4658-9683-ff312cab7944" controls></video>
 
+## 🔥 Updates 
+
+* 8/6/25: Added support for tool calling and [GPT-oss:20b](https://openai.com/index/introducing-gpt-oss/). 
+
 ## 📺 Video Tutorials
 
 See it in action or build it yourself? Check out these helpful video tutorials:
