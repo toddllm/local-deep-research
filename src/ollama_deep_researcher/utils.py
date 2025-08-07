@@ -10,6 +10,9 @@ from duckduckgo_search import DDGS
 
 from langchain_community.utilities import SearxSearchWrapper
 
+# Constants
+CHARS_PER_TOKEN = 4
+
 
 def get_config_value(value: Any) -> str:
     """
@@ -103,8 +106,8 @@ def deduplicate_and_format_sources(
             f"Most relevant content from source: {source['content']}\n===\n"
         )
         if fetch_full_page:
-            # Using rough estimate of 4 characters per token
-            char_limit = max_tokens_per_source * 4
+            # Using rough estimate of characters per token
+            char_limit = max_tokens_per_source * CHARS_PER_TOKEN
             # Handle None raw_content
             raw_content = source.get("raw_content", "")
             if raw_content is None:

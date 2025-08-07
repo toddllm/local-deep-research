@@ -32,9 +32,67 @@ from ollama_deep_researcher.prompts import (
     get_current_date,
     json_mode_query_instructions,
     tool_calling_query_instructions,
+    json_mode_reflection_instructions,
+    tool_calling_reflection_instructions,
 )
 from ollama_deep_researcher.lmstudio import ChatLMStudio
 
+# Constants
+MAX_TOKENS_PER_SOURCE = 1000
+CHARS_PER_TOKEN = 4
+
+def generate_search_query_with_structured_output(
+    configurable: Configuration,
+    messages: list,
+    tool_class,
+    fallback_query: str,
+    tool_query_field: str,
+    json_query_field: str,
+):
+    """Helper function to generate search queries using either tool calling or JSON mode.
+    
+    Args:
+        configurable: Configuration object
+        messages: List of messages to send to LLM
+        tool_class: Tool class for tool calling mode
+        fallback_query: Fallback search query if extraction fails
+        tool_query_field: Field name in tool args containing the query
+        json_query_field: Field name in JSON response containing the query
+        
+    Returns:
+        Dictionary with "search_query" key
+    """
+    if configurable.use_tool_calling:
+        llm = get_llm(configurable).bind_tools([tool_class])
+        result = llm.invoke(messages)
+
+        if not result.tool_calls:
+            return {"search_query": fallback_query}
+        
+        try:
+            tool_data = result.tool_calls[0]["args"]
+            search_query = tool_data.get(tool_query_field)
+            return {"search_query": search_query}
+        except (IndexError, KeyError):
+            return {"search_query": fallback_query}
+    
+    else:
+        # Use JSON mode
+        llm = get_llm(configurable)
+        result = llm.invoke(messages)
+        print(f"result: {result}")
+        content = result.content
+
+        try:
+            parsed_json = json.loads(content)
+            search_query = parsed_json.get(json_query_field)
+            if not search_query:
+                return {"search_query": fallback_query}
+            return {"search_query": search_query}
+        except (json.JSONDecodeError, KeyError):
+            if configurable.strip_thinking_tokens:
+                content = strip_thinking_tokens(content)
+            return {"search_query": fallback_query}
 
 def get_llm(configurable: Configuration):
     """Helper function to initialize LLM based on configuration.
@@ -76,7 +134,6 @@ def get_llm(configurable: Configuration):
                 format="json",
             )
 
-
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
     """LangGraph node that generates a search query based on the research topic.
@@ -101,58 +158,35 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
 
-    if configurable.use_tool_calling:
+    @tool
+    class Query(BaseModel):
+        """
+        This tool is used to generate a query for web search.
+        """
 
-        @tool
-        class Query(BaseModel):
-            """
-            This tool is used to generate a query for web search.
-            """
+        query: str = Field(description="The actual search query string")
+        rationale: str = Field(
+            description="Brief explanation of why this query is relevant"
+        )
 
-            query: str = Field(description="The actual search query string")
-            rationale: str = Field(
-                description="Brief explanation of why this query is relevant"
+    messages = [
+        SystemMessage(
+            content=formatted_prompt + (
+                tool_calling_query_instructions if configurable.use_tool_calling 
+                else json_mode_query_instructions
             )
+        ),
+        HumanMessage(content="Generate a query for web search:"),
+    ]
 
-        llm = get_llm(configurable).bind_tools([Query])
-
-        result = llm.invoke(
-            [
-                SystemMessage(
-                    content=formatted_prompt + tool_calling_query_instructions
-                ),
-                HumanMessage(content=f"Generate a query for web search:"),
-            ]
-        )
-
-        query = result.tool_calls[0]["args"]
-        search_query = query["query"]
-
-    else:
-        # Use JSON mode
-        llm = get_llm(configurable)
-
-        result = llm.invoke(
-            [
-                SystemMessage(content=formatted_prompt + json_mode_query_instructions),
-                HumanMessage(content=f"Generate a query for web search:"),
-            ]
-        )
-
-        # Get the content
-        content = result.content
-
-        # Parse the JSON response and get the query
-        try:
-            query = json.loads(content)
-            search_query = query["query"]
-        except (json.JSONDecodeError, KeyError):
-            # If parsing fails or the key is not found, use a fallback query
-            if configurable.strip_thinking_tokens:
-                content = strip_thinking_tokens(content)
-            search_query = content
-
-    return {"search_query": search_query}
+    return generate_search_query_with_structured_output(
+        configurable=configurable,
+        messages=messages,
+        tool_class=Query,
+        fallback_query=f"Tell me more about {state.research_topic}",
+        tool_query_field="query",
+        json_query_field="query",
+    )
 
 
 def web_research(state: SummaryState, config: RunnableConfig):
@@ -184,7 +218,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
         )
         search_str = deduplicate_and_format_sources(
             search_results,
-            max_tokens_per_source=1000,
+            max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
             fetch_full_page=configurable.fetch_full_page,
         )
     elif search_api == "perplexity":
@@ -193,7 +227,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
         )
         search_str = deduplicate_and_format_sources(
             search_results,
-            max_tokens_per_source=1000,
+            max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
             fetch_full_page=configurable.fetch_full_page,
         )
     elif search_api == "duckduckgo":
@@ -204,7 +238,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
         )
         search_str = deduplicate_and_format_sources(
             search_results,
-            max_tokens_per_source=1000,
+            max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
             fetch_full_page=configurable.fetch_full_page,
         )
     elif search_api == "searxng":
@@ -215,7 +249,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
         )
         search_str = deduplicate_and_format_sources(
             search_results,
-            max_tokens_per_source=1000,
+            max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
             fetch_full_page=configurable.fetch_full_page,
         )
     else:
@@ -311,75 +345,43 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
+    formatted_prompt = reflection_instructions.format(
+        research_topic=state.research_topic
+    )
 
-    if configurable.use_tool_calling:
+    @tool
+    class FollowUpQuery(BaseModel):
+        """
+        This tool is used to generate a follow-up query to address a knowledge gap.
+        """
 
-        @tool
-        class FollowUpQuery(BaseModel):
-            """
-            This tool is used to generate a follow-up query to address a knowledge gap.
-            """
-
-            follow_up_query: str = Field(
-                description="Write a specific question to address this gap"
-            )
-            knowledge_gap: str = Field(
-                description="Describe what information is missing or needs clarification"
-            )
-
-        llm = get_llm(configurable).bind_tools([FollowUpQuery])
-
-        result = llm.invoke(
-            [
-                SystemMessage(
-                    content=reflection_instructions.format(
-                        research_topic=state.research_topic
-                    )
-                ),
-                HumanMessage(
-                    content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:"
-                ),
-            ]
+        follow_up_query: str = Field(
+            description="Write a specific question to address this gap"
+        )
+        knowledge_gap: str = Field(
+            description="Describe what information is missing or needs clarification"
         )
 
-        try:
-            query_data = result.tool_calls[0]["args"]
-            search_query = query_data["follow_up_query"]
-            return {"search_query": search_query}
-        except (IndexError, KeyError):
-            return {"search_query": f"Tell me more about {state.research_topic}"}
+    messages = [
+        SystemMessage(
+            content=formatted_prompt + (
+                tool_calling_reflection_instructions if configurable.use_tool_calling 
+                else json_mode_reflection_instructions
+            )
+        ),
+        HumanMessage(
+            content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:"
+        ),
+    ]
 
-    else:
-        # Use JSON mode
-        llm = get_llm(configurable)
-
-        result = llm.invoke(
-            [
-                SystemMessage(
-                    content=reflection_instructions.format(
-                        research_topic=state.research_topic
-                    )
-                ),
-                HumanMessage(
-                    content=f"Reflect on our existing knowledge: \n === \n {state.running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:"
-                ),
-            ]
-        )
-
-        # Strip thinking tokens if configured
-        try:
-            # Try to parse as JSON first
-            reflection_content = json.loads(result.content)
-            # Get the follow-up query
-            query = reflection_content.get("follow_up_query")
-            # Check if query is None or empty
-            if not query:
-                # Use a fallback query
-                return {"search_query": f"Tell me more about {state.research_topic}"}
-            return {"search_query": query}
-        except (json.JSONDecodeError, KeyError, AttributeError):
-            # If parsing fails or the key is not found, use a fallback query
-            return {"search_query": f"Tell me more about {state.research_topic}"}
+    return generate_search_query_with_structured_output(
+        configurable=configurable,
+        messages=messages,
+        tool_class=FollowUpQuery,
+        fallback_query=f"Tell me more about {state.research_topic}",
+        tool_query_field="follow_up_query",
+        json_query_field="follow_up_query",
+    )
 
 
 def finalize_summary(state: SummaryState):
