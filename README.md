@@ -7,6 +7,12 @@ Local Deep Researcher is a fully local web research assistant that uses any LLM 
 Short summary video:
 <video src="https://github.com/user-attachments/assets/02084902-f067-4658-9683-ff312cab7944" controls></video>
 
+## 🔥 Updates 
+
+* 8/6/25: Added support for tool calling and [gpt-oss](https://openai.com/index/introducing-gpt-oss/). 
+
+> ⚠️ **WARNING (8/6/25)**: The `gpt-oss` models do not support JSON mode in Ollama. Select `use_tool_calling` in the configuration to use tool calling instead of JSON mode.
+
 ## 📺 Video Tutorials
 
 See it in action or build it yourself? Check out these helpful video tutorials:

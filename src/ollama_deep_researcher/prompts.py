@@ -1,10 +1,12 @@
 from datetime import datetime
 
+
 # Get current date in a readable format
 def get_current_date():
     return datetime.now().strftime("%B %d, %Y")
 
-query_writer_instructions="""Your goal is to generate a targeted web search query.
+
+query_writer_instructions = """Your goal is to generate a targeted web search query.
 
 <CONTEXT>
 Current date: {current_date}
@@ -15,23 +17,31 @@ Please ensure your queries account for the most current information available as
 {research_topic}
 </TOPIC>
 
-<FORMAT>
-Format your response as a JSON object with ALL three of these exact keys:
-   - "query": The actual search query string
-   - "rationale": Brief explanation of why this query is relevant
-</FORMAT>
-
 <EXAMPLE>
 Example output:
 {{
     "query": "machine learning transformer architecture explained",
     "rationale": "Understanding the fundamental structure of transformer models"
 }}
-</EXAMPLE>
+</EXAMPLE>"""
+
+json_mode_query_instructions = """<FORMAT>
+Format your response as a JSON object with ALL three of these exact keys:
+- "query": The actual search query string
+- "rationale": Brief explanation of why this query is relevant
+</FORMAT>
 
 Provide your response in JSON format:"""
 
-summarizer_instructions="""
+tool_calling_query_instructions = """<INSTRUCTIONS   >
+Call the Query tool to format your response with the following keys:
+   - "query": The actual search query string
+   - "rationale": Brief explanation of why this query is relevant
+</INSTRUCTIONS>
+
+Call the Query Tool to generate a query for this request:"""
+
+summarizer_instructions = """
 <GOAL>
 Generate a high-quality summary of the provided context.
 </GOAL>
@@ -71,9 +81,9 @@ reflection_instructions = """You are an expert research assistant analyzing a su
 
 <REQUIREMENTS>
 Ensure the follow-up question is self-contained and includes necessary context for web search.
-</REQUIREMENTS>
+</REQUIREMENTS>"""
 
-<FORMAT>
+json_mode_reflection_instructions = """<FORMAT>
 Format your response as a JSON object with these exact keys:
 - knowledge_gap: Describe what information is missing or needs clarification
 - follow_up_query: Write a specific question to address this gap
@@ -88,3 +98,15 @@ Reflect carefully on the Summary to identify knowledge gaps and produce a follow
 </Task>
 
 Provide your analysis in JSON format:"""
+
+tool_calling_reflection_instructions = """<INSTRUCTIONS>
+Call the FollowUpQuery tool to format your response with the following keys:
+- follow_up_query: Write a specific question to address this gap
+- knowledge_gap: Describe what information is missing or needs clarification
+</INSTRUCTIONS>
+
+<Task>
+Reflect carefully on the Summary to identify knowledge gaps and produce a follow-up query.
+</Task>
+
+Call the FollowUpQuery Tool to generate a reflection for this request:"""
