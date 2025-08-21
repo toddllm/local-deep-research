@@ -57,9 +57,48 @@ async def capture_screenshots():
             print("📸 Capturing research in progress...")
             await page.screenshot(path='screenshots/research-in-progress.png', full_page=True)
             
-            # Wait a bit more to see activity logs
-            await page.wait_for_timeout(5000)
-            await page.screenshot(path='screenshots/activity-logs.png', full_page=True)
+            # Wait for research to complete (up to 5 minutes)
+            print("📸 Waiting for research to complete...")
+            completed = False
+            max_wait_time = 300  # 5 minutes
+            start_time = time.time()
+            
+            while not completed and (time.time() - start_time) < max_wait_time:
+                # Check if research is complete by looking for results section
+                try:
+                    await page.wait_for_selector('#results', timeout=2000)
+                    # Check if results are visible (not just the container)
+                    results_visible = await page.is_visible('#results .card')
+                    if results_visible:
+                        completed = True
+                        print("✅ Research completed! Capturing results...")
+                        break
+                except:
+                    pass
+                
+                await page.wait_for_timeout(5000)  # Wait 5 seconds before checking again
+            
+            if completed:
+                # Capture completed results
+                await page.screenshot(path='screenshots/research-results.png', full_page=True)
+                
+                # Try to expand debug information if available
+                try:
+                    debug_button = await page.query_selector('.debug-toggle')
+                    if debug_button:
+                        await debug_button.click()
+                        await page.wait_for_timeout(1000)
+                        await page.screenshot(path='screenshots/debug-information.png', full_page=True)
+                        print("📸 Debug information captured!")
+                except:
+                    print("ℹ️ No debug information available to capture")
+                
+                # Capture activity logs one more time with final state
+                await page.screenshot(path='screenshots/final-activity-logs.png', full_page=True)
+                
+            else:
+                print("⏰ Research didn't complete within 5 minutes, capturing partial results...")
+                await page.screenshot(path='screenshots/activity-logs.png', full_page=True)
             
             print("✅ Screenshots captured successfully!")
             

@@ -43,6 +43,14 @@ Local Deep Researcher is a fully local web research assistant that uses any LLM 
 ![Activity Logs](screenshots/activity-logs.png)
 *Comprehensive logging with expandable details, source validation scores, and debug information*
 
+### Research Results with Complete Analysis
+![Research Results](screenshots/demo-complete-results.png)
+*Complete research results showing comprehensive analysis, sources, and detailed activity logs with verbose debugging information*
+
+### Activity Log Focus with Debug Details
+![Debug Activity](screenshots/demo-activity-focus.png)
+*Focused view of activity logs with expanded verbose details including memory usage, processing times, and API responses*
+
 ---
 
 ![ollama-deep-research](https://github.com/user-attachments/assets/1c6b28f8-6b64-42ba-a491-1ab2875d50ea)
