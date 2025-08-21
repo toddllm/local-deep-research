@@ -132,11 +132,11 @@ async def specialized_provider_research(topic: str):
     Use different providers for different aspects of research
     """
     research_plan = {
-        'initial_analysis': ('anthropic', 'claude-3.5-sonnet'),
-        'web_search': ('openai', 'gpt-4.1-mini'),  # Fast for search queries
-        'deep_analysis': ('openai', 'o1-preview'),  # Best reasoning
-        'summarization': ('together', 'llama-3.2-8b'),  # Cost-effective
-        'validation': ('anthropic', 'claude-3.5-sonnet')  # High quality
+        'initial_analysis': ('anthropic', 'latest-claude-model'),
+        'web_search': ('openai', 'fast-mini-model'),  # Fast for search queries
+        'deep_analysis': ('openai', 'best-reasoning-model'),  # Best reasoning
+        'summarization': ('together', 'efficient-model'),  # Cost-effective
+        'validation': ('anthropic', 'high-quality-model')  # High quality
     }
     
     results = {}
@@ -211,9 +211,9 @@ class CostManager:
 class QualityValidator:
     def __init__(self):
         self.validation_models = {
-            'fact_check': 'claude-3.5-sonnet',
-            'bias_detection': 'gpt-4.1',
-            'completeness': 'o1-preview'
+            'fact_check': 'best-factual-model',
+            'bias_detection': 'best-analytical-model',
+            'completeness': 'best-reasoning-model'
         }
         
     async def validate_research_quality(self, research_result: dict):
@@ -352,32 +352,32 @@ class AnthropicAdapter(CloudProviderAdapter):
 providers:
   openai:
     api_key: "${OPENAI_API_KEY}"
-    default_model: "gpt-4.1"
+    default_model: "latest-gpt-model"
     rate_limits:
       requests_per_minute: 3500
       tokens_per_minute: 200000
     pricing:
-      "gpt-4.1": {"input": 0.0025, "output": 0.01}
-      "gpt-4.1-mini": {"input": 0.00015, "output": 0.0006}
+      "flagship-model": {"input": 0.0025, "output": 0.01}
+      "mini-model": {"input": 0.00015, "output": 0.0006}
       
   anthropic:
     api_key: "${ANTHROPIC_API_KEY}"
-    default_model: "claude-3.5-sonnet"
+    default_model: "latest-claude-model"
     rate_limits:
       requests_per_minute: 1000
       tokens_per_minute: 80000
     pricing:
-      "claude-3.5-sonnet": {"input": 0.003, "output": 0.015}
-      "claude-3-haiku": {"input": 0.00025, "output": 0.00125}
+      "flagship-model": {"input": 0.003, "output": 0.015}
+      "efficient-model": {"input": 0.00025, "output": 0.00125}
       
   together:
     api_key: "${TOGETHER_API_KEY}"
-    default_model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+    default_model: "latest-llama-model"
     rate_limits:
       requests_per_minute: 600
       tokens_per_minute: 100000
     pricing:
-      "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo": {"input": 0.0009, "output": 0.0009}
+      "large-llama-model": {"input": 0.0009, "output": 0.0009}
 
 research_strategies:
   default: "provider_ensemble"

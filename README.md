@@ -88,7 +88,7 @@ For the easiest experience, use the built-in web interface:
 ```bash
 # Install Ollama from https://ollama.ai
 ollama serve
-ollama pull llama3.1:8b  # or any other model
+ollama pull llama:latest  # or any other model
 ```
 
 2. **Clone and run**:
@@ -131,7 +131,7 @@ Enable for enhanced capabilities:
 - **Perplexity**: AI-enhanced search results
 
 ### Example Research Flow
-1. Select model: `llama3.1:8b`
+1. Select model: Your preferred Ollama model
 2. Enable Advanced Mode
 3. Select sources: `Tavily + arXiv`
 4. Set depth: `3 loops`
@@ -159,7 +159,7 @@ cp .env.example .env
 
 2. Pull a local LLM from [Ollama](https://ollama.com/search). As an [example](https://ollama.com/library/deepseek-r1:8b):
 ```shell
-ollama pull deepseek-r1:8b
+ollama pull deepseek-r1  # or latest version
 ```
 
 3. Optionally, update the `.env` file with the following Ollama configuration settings. 
@@ -176,7 +176,7 @@ LOCAL_LLM=model # the model to use, defaults to `llama3.2` if not set
 1. Download and install LMStudio from [here](https://lmstudio.ai/).
 
 2. In LMStudio:
-   - Download and load your preferred model (e.g., qwen_qwq-32b)
+   - Download and load your preferred model
    - Go to the "Local Server" tab
    - Start the server with the OpenAI-compatible API
    - Note the server URL (default: http://localhost:1234/v1)
@@ -186,7 +186,7 @@ LOCAL_LLM=model # the model to use, defaults to `llama3.2` if not set
 * If set, these values will take precedence over the defaults set in the `Configuration` class in `configuration.py`. 
 ```shell
 LLM_PROVIDER=lmstudio
-LOCAL_LLM=qwen_qwq-32b  # Use the exact model name as shown in LMStudio
+LOCAL_LLM=your-model-name  # Use the exact model name as shown in LMStudio
 LMSTUDIO_BASE_URL=http://localhost:1234/v1
 ```
 
@@ -269,7 +269,7 @@ Give the assistant a topic for research, and you can visualize its process!
 
 ### Model Compatibility Note
 
-When selecting a local LLM, set steps use structured JSON output. Some models may have difficulty with this requirement, and the assistant has fallback mechanisms to handle this. As an example, the [DeepSeek R1 (7B)](https://ollama.com/library/deepseek-llm:7b) and [DeepSeek R1 (1.5B)](https://ollama.com/library/deepseek-r1:1.5b) models have difficulty producing required JSON output, and the assistant will use a fallback mechanism to handle this.
+When selecting a local LLM, set steps use structured JSON output. Some models may have difficulty with this requirement, and the assistant has fallback mechanisms to handle this. For example, certain DeepSeek R1 models may have difficulty producing required JSON output, and the assistant will use a fallback mechanism to handle this.
   
 ### Browser Compatibility Note
 
@@ -396,8 +396,8 @@ Transform your local network into a powerful distributed AI research system by o
 
 **Architecture Highlights:**
 - Research Coordinator managing distributed model nodes
-- High-performance nodes (RTX 4090) for complex reasoning
-- Efficient nodes (RTX 3060) for fast search and validation
+- High-performance nodes (high-end GPUs) for complex reasoning
+- Efficient nodes (mid-range GPUs) for fast search and validation
 - Specialized nodes for domain-specific tasks (code analysis, academic papers)
 
 **Use Cases:**
