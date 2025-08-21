@@ -9,14 +9,18 @@ The Cloud Multi-Provider Deep Researcher transforms the local research system in
 ### 1. Multi-Provider Model Access
 
 #### Supported Cloud Providers
-- **OpenAI**: GPT-4.1, GPT-4o, GPT-4.1-mini, o1-preview, o1-mini
-- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Haiku, Claude 3 Opus
-- **AWS Bedrock**: Titan, Nova, Claude via Bedrock, Llama via Bedrock
-- **Together AI**: Llama 3.1/3.2, Qwen2.5, DeepSeek, Mixtral, Code Llama
-- **Google Vertex AI**: Gemini Pro/Flash, PaLM 2, Codey
-- **Azure OpenAI**: GPT-4, GPT-3.5, Codex via Azure
-- **Cohere**: Command R+, Command R, Embed v3
-- **Mistral AI**: Mistral Large, Mistral Medium, Codestral
+- **OpenAI**: Latest GPT models (or newer versions), o-series reasoning models
+- **Anthropic**: Latest Claude models (or newer versions) with long context support
+- **Google**: Latest Gemini and Gemma models (or newer versions)
+- **Meta (via providers)**: Latest Llama models (or newer versions)
+- **DeepSeek**: Latest DeepSeek models with mixture-of-experts architecture
+- **Alibaba Cloud**: Latest Qwen models with extended context windows
+- **xAI**: Latest Grok models with tool usage capabilities
+- **IBM**: Latest Granite models including MoE variants
+- **Cohere**: Latest Command models optimized for enterprise RAG
+- **AWS Bedrock**: Access to multiple providers' latest models
+- **Together AI**: Access to latest open-source models
+- **Azure OpenAI**: Enterprise-secured versions of latest OpenAI models
 
 #### Provider Configuration Management
 ```python
@@ -45,26 +49,26 @@ class CloudProvider:
 ```yaml
 Model Capabilities Matrix:
   Reasoning & Analysis:
-    Tier 1: [o1-preview, Claude-3.5-Sonnet, GPT-4.1]
-    Tier 2: [GPT-4o, Claude-3-Opus, Gemini-Pro]
-    Tier 3: [GPT-4.1-mini, Claude-3-Haiku, Gemini-Flash]
+    Tier 1: [Latest reasoning-optimized models from OpenAI, Anthropic, Google]
+    Tier 2: [General-purpose flagship models]
+    Tier 3: [Efficient smaller models with good reasoning]
     
   Code Understanding:
-    Tier 1: [GPT-4.1, Claude-3.5-Sonnet, Codestral]
-    Tier 2: [Code-Llama-70b, DeepSeek-Coder-33b]
-    Tier 3: [GPT-4.1-mini, Code-Llama-13b]
+    Tier 1: [Latest code-specialized models from major providers]
+    Tier 2: [Open-source code models (DeepSeek-Coder, Code Llama variants)]
+    Tier 3: [Smaller efficient code models]
     
   Fast Processing:
-    Tier 1: [GPT-4.1-mini, Claude-3-Haiku, Gemini-Flash]
-    Tier 2: [Llama-3.2-3b, Mistral-7b, Command-R]
+    Tier 1: [Latest mini/nano models from major providers]
+    Tier 2: [Efficient open-source models (smaller Llama, Mistral variants)]
     
   Academic/Scientific:
-    Tier 1: [Claude-3.5-Sonnet, o1-preview, GPT-4.1]
-    Tier 2: [Claude-3-Opus, Gemini-Pro]
+    Tier 1: [Models with strong reasoning and academic training]
+    Tier 2: [General models with good technical capabilities]
     
   Multilingual:
-    Tier 1: [GPT-4.1, Claude-3.5-Sonnet, Qwen2.5-72b]
-    Tier 2: [Gemini-Pro, Command-R+]
+    Tier 1: [Latest multilingual models (Qwen, Gemini, GPT variants)]
+    Tier 2: [Models with broad language support]
 ```
 
 #### Dynamic Model Selection Algorithm

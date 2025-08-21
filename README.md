@@ -379,7 +379,7 @@ The Local Deep Researcher project is evolving into a comprehensive AI research p
 | **Scaling** | Limited by hardware | Horizontal LAN scaling | Auto-scaling cloud |
 | **Cost** | Hardware only | Hardware + power | Pay-per-use |
 | **Privacy** | Full local control | LAN-contained | Provider dependent |
-| **Model Variety** | Ollama catalog | Custom + Ollama + vLLM | GPT-4.1, Claude, Gemini+ |
+| **Model Variety** | Ollama catalog | Custom + Ollama + vLLM | Latest models from all major providers |
 | **Research Quality** | Single model | Multi-model consensus | Best-in-class models |
 | **Target Users** | Individuals, small teams | Research labs, enterprises | Global enterprises |
 
@@ -414,12 +414,13 @@ Transform your local network into a powerful distributed AI research system by o
 Leverage the best AI models from major cloud providers in an enterprise-grade research platform with advanced cost optimization and quality assurance.
 
 **Supported Providers:**
-- **OpenAI**: GPT-4.1, GPT-4o, o1-preview, o1-mini
-- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Haiku, Claude 3 Opus
-- **AWS Bedrock**: Titan, Nova, Claude via Bedrock
-- **Together AI**: Llama 3.1/3.2, Qwen2.5, DeepSeek, Mixtral
-- **Google Vertex AI**: Gemini Pro/Flash, PaLM 2, Codey
-- **Azure OpenAI, Cohere, Mistral AI**: Full ecosystem support
+- **OpenAI**: Latest GPT models and o-series reasoning models
+- **Anthropic**: Latest Claude models with extended context support
+- **Google**: Latest Gemini and Gemma model families
+- **Meta**: Latest Llama models (via various providers)
+- **DeepSeek**: Latest models with mixture-of-experts architecture
+- **Together AI, AWS Bedrock, Azure**: Access to multiple providers' models
+- **Plus**: Qwen, Grok, Granite, Cohere, and other leading models
 
 **Advanced Features:**
 - **Provider Ensemble Strategy**: Research across multiple providers for consensus
@@ -471,7 +472,7 @@ Leverage the best AI models from major cloud providers in an enterprise-grade re
 - **Flexibility**: Mix of model types and capabilities
 
 #### Cloud Multi-Provider Version  
-- **Access**: Best-in-class models (GPT-4.1, Claude 3.5, o1-preview)
+- **Access**: Latest best-in-class models from all major providers
 - **Scaling**: Automatic scaling without infrastructure
 - **Quality**: Advanced validation and bias detection
 - **Enterprise**: Compliance, auditing, cost controls

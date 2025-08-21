@@ -35,11 +35,11 @@ Model Registry:
 #### Specialized Model Assignment
 ```python
 Query Types and Model Assignment:
-- Literature Search: Fast, efficient models (Llama 3.2:3b, Phi-3-mini)
-- Analysis & Reasoning: Larger reasoning models (Llama 3.1:70b, Qwen2.5:32b)
-- Code Analysis: Specialized code models (CodeLlama, DeepSeek-Coder)
-- Scientific Writing: Academic-focused models (Clinical models, SciPhi)
-- Summarization: Optimized summary models (Llama 3.2:1b for speed)
+- Literature Search: Fast, efficient smaller models
+- Analysis & Reasoning: Larger reasoning-optimized models
+- Code Analysis: Specialized code models (Code Llama variants, DeepSeek-Coder)
+- Scientific Writing: Academic-focused and domain-specific models
+- Summarization: Optimized smaller models for speed
 ```
 
 ### 3. Advanced Research Orchestration
@@ -86,24 +86,24 @@ LAN Network Topology:
     
   Model Nodes:
     Node 1 (High-Performance):
-      - Hardware: RTX 4090, 32GB RAM
-      - Models: Llama 3.1:70b, Qwen2.5:32b
+      - Hardware: RTX 4090 or newer, 32GB+ RAM
+      - Models: Large reasoning models (70B+ parameters)
       - Role: Complex reasoning, analysis
       
     Node 2 (Balanced):
-      - Hardware: RTX 3080, 16GB RAM  
-      - Models: Llama 3.2:8b, Mistral 7b
+      - Hardware: RTX 3080 or equivalent, 16GB+ RAM  
+      - Models: Medium-sized models (7B-30B parameters)
       - Role: General research, summarization
       
     Node 3 (Efficient):
-      - Hardware: RTX 3060, 8GB RAM
-      - Models: Llama 3.2:3b, Phi-3-mini
+      - Hardware: RTX 3060 or equivalent, 8GB+ RAM
+      - Models: Small efficient models (1B-7B parameters)
       - Role: Quick searches, validation
       
     Node 4 (Specialized):
-      - Hardware: CPU-only server
-      - Models: CodeLlama, Clinical models
-      - Role: Code analysis, domain-specific tasks
+      - Hardware: CPU-only or mixed
+      - Models: Domain-specific models (code, medical, etc.)
+      - Role: Specialized analysis tasks
 ```
 
 ### API Design
@@ -178,10 +178,10 @@ research_strategies:
   max_parallel_tasks: 8
   
 model_preferences:
-  reasoning: ["llama3.1:70b", "qwen2.5:32b", "mistral:7b"]
-  summarization: ["llama3.2:8b", "llama3.2:3b"]
-  code_analysis: ["codellama:13b", "deepseek-coder:6.7b"]
-  search_query_generation: ["llama3.2:3b", "phi3:mini"]
+  reasoning: ["largest_available_models", "70b+_parameter_models"]
+  summarization: ["medium_models", "7b-30b_parameter_models"]
+  code_analysis: ["code_specialized_models", "deepseek_coder_variants"]
+  search_query_generation: ["small_fast_models", "1b-7b_parameter_models"]
 ```
 
 ### Advanced Features
