@@ -370,6 +370,10 @@ The following issues have been addressed in the latest update:
 
 The Local Deep Researcher project is evolving into a comprehensive AI research platform with multiple specialized versions designed for different use cases and deployment scenarios.
 
+**📊 Model Information**: The AI landscape changes rapidly. For current model comparisons, benchmarks, and capabilities, see:
+- **Live Model Tracking**: https://lifearchitect.ai/models-table/
+- Check provider documentation for the latest available models
+
 ### 📊 Version Comparison
 
 | Feature | Current (Local) | LAN Multi-Model | Cloud Multi-Provider |
@@ -414,13 +418,12 @@ Transform your local network into a powerful distributed AI research system by o
 Leverage the best AI models from major cloud providers in an enterprise-grade research platform with advanced cost optimization and quality assurance.
 
 **Supported Providers:**
-- **OpenAI**: Latest GPT models and o-series reasoning models
-- **Anthropic**: Latest Claude models with extended context support
-- **Google**: Latest Gemini and Gemma model families
-- **Meta**: Latest Llama models (via various providers)
-- **DeepSeek**: Latest models with mixture-of-experts architecture
-- **Together AI, AWS Bedrock, Azure**: Access to multiple providers' models
-- **Plus**: Qwen, Grok, Granite, Cohere, and other leading models
+- Major cloud AI providers (OpenAI, Anthropic, Google, etc.)
+- Open-source model platforms (Together AI, Replicate, etc.)
+- Cloud infrastructure providers (AWS Bedrock, Azure, GCP)
+- Specialized providers for domain-specific models
+- New providers added as they become available
+- See https://lifearchitect.ai/models-table/ for current landscape
 
 **Advanced Features:**
 - **Provider Ensemble Strategy**: Research across multiple providers for consensus

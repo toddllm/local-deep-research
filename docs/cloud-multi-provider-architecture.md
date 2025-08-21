@@ -4,6 +4,10 @@
 
 The Cloud Multi-Provider Deep Researcher transforms the local research system into a cloud-native, multi-provider platform that leverages the best AI models from major cloud providers. This version provides access to cutting-edge models, automatic scaling, and enterprise-grade reliability.
 
+**Note**: The AI model landscape evolves rapidly. For current model availability and capabilities, refer to:
+- Live model tracking: https://lifearchitect.ai/models-table/
+- Provider-specific documentation for the latest offerings
+
 ## Architecture Components
 
 ### 1. Multi-Provider Model Access

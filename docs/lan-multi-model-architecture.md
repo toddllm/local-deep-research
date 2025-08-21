@@ -4,6 +4,10 @@
 
 The LAN Multi-Model Deep Researcher extends the local deep research capabilities by orchestrating multiple language models across Local Area Network (LAN) infrastructure. This version enables distributed processing, load balancing, and specialized model utilization for different research tasks.
 
+**Note**: Model capabilities and hardware requirements evolve rapidly. For current model information:
+- Model comparison and benchmarks: https://lifearchitect.ai/models-table/
+- Check your specific model provider's documentation for latest requirements
+
 ## Architecture Components
 
 ### 1. Model Discovery and Management
@@ -86,22 +90,22 @@ LAN Network Topology:
     
   Model Nodes:
     Node 1 (High-Performance):
-      - Hardware: RTX 4090 or newer, 32GB+ RAM
-      - Models: Large reasoning models (70B+ parameters)
+      - Hardware: High-end GPU with substantial VRAM
+      - Models: Largest available reasoning models
       - Role: Complex reasoning, analysis
       
     Node 2 (Balanced):
-      - Hardware: RTX 3080 or equivalent, 16GB+ RAM  
-      - Models: Medium-sized models (7B-30B parameters)
+      - Hardware: Mid-range GPU with moderate VRAM
+      - Models: Medium-sized general-purpose models
       - Role: General research, summarization
       
     Node 3 (Efficient):
-      - Hardware: RTX 3060 or equivalent, 8GB+ RAM
-      - Models: Small efficient models (1B-7B parameters)
+      - Hardware: Entry-level GPU or high-performance CPU
+      - Models: Small, fast, efficient models
       - Role: Quick searches, validation
       
     Node 4 (Specialized):
-      - Hardware: CPU-only or mixed
+      - Hardware: Task-appropriate hardware
       - Models: Domain-specific models (code, medical, etc.)
       - Role: Specialized analysis tasks
 ```
@@ -178,10 +182,10 @@ research_strategies:
   max_parallel_tasks: 8
   
 model_preferences:
-  reasoning: ["largest_available_models", "70b+_parameter_models"]
-  summarization: ["medium_models", "7b-30b_parameter_models"]
-  code_analysis: ["code_specialized_models", "deepseek_coder_variants"]
-  search_query_generation: ["small_fast_models", "1b-7b_parameter_models"]
+  reasoning: ["largest_available_models", "best_reasoning_models"]
+  summarization: ["balanced_models", "efficient_summarizers"]
+  code_analysis: ["code_specialized_models", "programming_optimized"]
+  search_query_generation: ["fast_models", "low_latency_models"]
 ```
 
 ### Advanced Features
