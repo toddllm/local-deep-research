@@ -366,6 +366,125 @@ The following issues have been addressed in the latest update:
 - **Research Templates**: Pre-configured templates for different research types
 - **Collaborative Features**: Share and collaborate on research projects
 
+## 🚀 Roadmap & Future Versions
+
+The Local Deep Researcher project is evolving into a comprehensive AI research platform with multiple specialized versions designed for different use cases and deployment scenarios.
+
+### 📊 Version Comparison
+
+| Feature | Current (Local) | LAN Multi-Model | Cloud Multi-Provider |
+|---------|----------------|-----------------|---------------------|
+| **Deployment** | Single machine | LAN distributed | Cloud-native |
+| **Model Access** | Local Ollama models | Multiple LAN models | Major cloud providers |
+| **Scaling** | Limited by hardware | Horizontal LAN scaling | Auto-scaling cloud |
+| **Cost** | Hardware only | Hardware + power | Pay-per-use |
+| **Privacy** | Full local control | LAN-contained | Provider dependent |
+| **Model Variety** | Ollama catalog | Custom + Ollama + vLLM | GPT-4.1, Claude, Gemini+ |
+| **Research Quality** | Single model | Multi-model consensus | Best-in-class models |
+| **Target Users** | Individuals, small teams | Research labs, enterprises | Global enterprises |
+
+### 🌐 LAN Multi-Model Version
+**Status**: Design Complete | **Issue**: [#6](https://github.com/toddllm/local-deep-research/issues/6)
+
+Transform your local network into a powerful distributed AI research system by orchestrating multiple models across different machines.
+
+**Key Capabilities:**
+- **Automatic Model Discovery**: Detect Ollama, vLLM, and custom inference servers across your LAN
+- **Intelligent Load Balancing**: Distribute tasks based on model capabilities and system load
+- **Multi-Model Ensemble Research**: Use multiple models for consensus and enhanced quality
+- **Specialized Task Assignment**: Route different research aspects to optimal models
+
+**Architecture Highlights:**
+- Research Coordinator managing distributed model nodes
+- High-performance nodes (RTX 4090) for complex reasoning
+- Efficient nodes (RTX 3060) for fast search and validation
+- Specialized nodes for domain-specific tasks (code analysis, academic papers)
+
+**Use Cases:**
+- Academic research labs with multiple workstations
+- Enterprise research teams sharing GPU resources
+- Collaborative research environments
+- Optimizing existing hardware investments
+
+**Documentation**: [docs/lan-multi-model-architecture.md](docs/lan-multi-model-architecture.md)
+
+### ☁️ Cloud Multi-Provider Version
+**Status**: Design Complete | **Issue**: [#7](https://github.com/toddllm/local-deep-research/issues/7)
+
+Leverage the best AI models from major cloud providers in an enterprise-grade research platform with advanced cost optimization and quality assurance.
+
+**Supported Providers:**
+- **OpenAI**: GPT-4.1, GPT-4o, o1-preview, o1-mini
+- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Haiku, Claude 3 Opus
+- **AWS Bedrock**: Titan, Nova, Claude via Bedrock
+- **Together AI**: Llama 3.1/3.2, Qwen2.5, DeepSeek, Mixtral
+- **Google Vertex AI**: Gemini Pro/Flash, PaLM 2, Codey
+- **Azure OpenAI, Cohere, Mistral AI**: Full ecosystem support
+
+**Advanced Features:**
+- **Provider Ensemble Strategy**: Research across multiple providers for consensus
+- **Cost Optimization**: Intelligent model selection within budget constraints  
+- **Quality Assurance**: Multi-dimensional validation and bias detection
+- **Enterprise Security**: Encrypted API keys, audit logging, compliance support
+
+**Research Strategies:**
+- **Ensemble Research**: Multiple providers research same topic for consensus
+- **Specialized Research**: Different providers for different aspects
+- **Cost-Optimized**: Maximize quality within budget constraints
+
+**Documentation**: [docs/cloud-multi-provider-architecture.md](docs/cloud-multi-provider-architecture.md)
+
+### 🛣️ Implementation Timeline
+
+**Q1 2025**: Current version maintenance and enhancement
+- Performance optimizations
+- Additional search providers
+- UI/UX improvements
+
+**Q2 2025**: LAN Multi-Model version development
+- Model discovery infrastructure
+- Load balancing and orchestration
+- Ensemble research capabilities
+
+**Q3 2025**: Cloud Multi-Provider version development
+- Provider integrations (OpenAI, Anthropic, Together)
+- Cost management and optimization
+- Quality assurance framework
+
+**Q4 2025**: Enterprise features and integration
+- Security enhancements
+- Compliance features
+- Advanced analytics and monitoring
+
+### 🎯 Benefits by Version
+
+#### Current Local Version
+- **Privacy**: Complete data control
+- **Cost**: No API costs after hardware investment
+- **Simplicity**: Easy setup and maintenance
+- **Reliability**: No internet dependency
+
+#### LAN Multi-Model Version
+- **Performance**: 3x research throughput
+- **Quality**: Multi-model consensus and validation
+- **Scalability**: Leverage existing hardware across network
+- **Flexibility**: Mix of model types and capabilities
+
+#### Cloud Multi-Provider Version  
+- **Access**: Best-in-class models (GPT-4.1, Claude 3.5, o1-preview)
+- **Scaling**: Automatic scaling without infrastructure
+- **Quality**: Advanced validation and bias detection
+- **Enterprise**: Compliance, auditing, cost controls
+
+### 🚀 Getting Involved
+
+Interested in contributing to or testing these future versions? 
+
+- **Feedback**: Comment on issues [#6](https://github.com/toddllm/local-deep-research/issues/6) and [#7](https://github.com/toddllm/local-deep-research/issues/7)
+- **Testing**: Join beta testing programs when available
+- **Development**: Contribute to design and implementation
+- **Documentation**: Help improve architecture documentation
+
 ## 🔄 Alternative Implementations
 
 A TypeScript port of this project (without Perplexity search) is available at:
