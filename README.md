@@ -83,8 +83,26 @@ See it in action or build it yourself? Check out these helpful video tutorials:
 
 For the easiest experience, use the built-in web interface:
 
+### Environment Configuration
+
+1. **Set up your environment file**:
+```bash
+# Copy the example configuration
+cp .env.example .env
+
+# Edit .env with your settings
+# Required: Search API key (Tavily recommended)
+# Required: LLM provider configuration
+```
+
+📝 **See `.env.example`** for complete configuration documentation including:
+- All available options with descriptions
+- Required vs optional settings
+- Common troubleshooting tips
+- Security best practices
+
 ### Quick Setup
-1. **Install and start Ollama**:
+1. **Install and start your model server**:
 ```bash
 # Install your preferred model server
 # Start the model server
@@ -302,6 +320,34 @@ The output of the graph is a markdown file containing the research summary, with
 The final summary is saved to the graph state as well:
 
 ![Screenshot 2024-12-05 at 4 10 11 PM](https://github.com/user-attachments/assets/f6d997d5-9de5-495f-8556-7d3891f6bc96)
+
+## Configuration
+
+### Environment Variables
+
+The application uses environment variables for configuration. Copy `.env.example` to `.env` and configure:
+
+#### Required Settings
+- **Search API**: Choose and configure at least one search provider
+  - `SEARCH_API`: Set to `tavily` (recommended), `duckduckgo`, `perplexity`, or `searxng`
+  - API keys required for some providers (see `.env.example`)
+  
+- **LLM Provider**: Configure your local model server
+  - `LLM_PROVIDER`: Set to `ollama` or `lmstudio`
+  - `LOCAL_LLM`: Specify your model name
+  - Server URLs and ports as needed
+
+#### Optional Settings
+- **Research Behavior**: 
+  - `MAX_WEB_RESEARCH_LOOPS`: Number of research iterations (default: 3)
+  - `FETCH_FULL_PAGE`: Enable comprehensive content fetching
+  - `USE_TOOL_CALLING`: For models that don't support JSON mode
+  
+- **Source Validation**:
+  - `MIN_SOURCE_RELEVANCE_SCORE`: Filter low-quality sources (0.0-1.0)
+  - `REQUIRE_VALID_SOURCES`: Retry if no good sources found
+
+See `.env.example` for complete documentation and examples.
 
 ## Deployment Options
 
