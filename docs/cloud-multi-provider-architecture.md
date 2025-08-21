@@ -15,13 +15,12 @@ The Cloud Multi-Provider Deep Researcher transforms the local research system in
 #### Supported Cloud Providers
 - **OpenAI**: Latest GPT models (or newer versions), o-series reasoning models
 - **Anthropic**: Latest Claude models (or newer versions) with long context support
-- **Google**: Latest Gemini and Gemma models (or newer versions)
-- **Meta (via providers)**: Latest Llama models (or newer versions)
-- **DeepSeek**: Latest DeepSeek models with mixture-of-experts architecture
-- **Alibaba Cloud**: Latest Qwen models with extended context windows
-- **xAI**: Latest Grok models with tool usage capabilities
-- **IBM**: Latest Granite models including MoE variants
-- **Cohere**: Latest Command models optimized for enterprise RAG
+- **Google**: Latest models from Google AI/DeepMind
+- **Meta (via providers)**: Latest open models from Meta
+- **Chinese AI Labs**: Latest models from leading Chinese developers
+- **Enterprise Providers**: Models optimized for business use cases
+- **Open Source Leaders**: Community and research models
+- **Specialized Providers**: Domain-specific and task-optimized models
 - **AWS Bedrock**: Access to multiple providers' latest models
 - **Together AI**: Access to latest open-source models
 - **Azure OpenAI**: Enterprise-secured versions of latest OpenAI models
@@ -59,19 +58,19 @@ Model Capabilities Matrix:
     
   Code Understanding:
     Tier 1: [Latest code-specialized models from major providers]
-    Tier 2: [Open-source code models (DeepSeek-Coder, Code Llama variants)]
+    Tier 2: [Open-source code-specialized models]
     Tier 3: [Smaller efficient code models]
     
   Fast Processing:
     Tier 1: [Latest mini/nano models from major providers]
-    Tier 2: [Efficient open-source models (smaller Llama, Mistral variants)]
+    Tier 2: [Efficient open-source models]
     
   Academic/Scientific:
     Tier 1: [Models with strong reasoning and academic training]
     Tier 2: [General models with good technical capabilities]
     
   Multilingual:
-    Tier 1: [Latest multilingual models (Qwen, Gemini, GPT variants)]
+    Tier 1: [Latest multilingual models from major providers]
     Tier 2: [Models with broad language support]
 ```
 
@@ -376,12 +375,12 @@ providers:
       
   together:
     api_key: "${TOGETHER_API_KEY}"
-    default_model: "latest-llama-model"
+    default_model: "latest-available-model"
     rate_limits:
       requests_per_minute: 600
       tokens_per_minute: 100000
     pricing:
-      "large-llama-model": {"input": 0.0009, "output": 0.0009}
+      "large-model": {"input": 0.0009, "output": 0.0009}
 
 research_strategies:
   default: "provider_ensemble"

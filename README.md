@@ -19,7 +19,7 @@ Local Deep Researcher is an advanced AI research tool that combines multiple sea
 
 ## Overview
 
-Local Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search) or [LMStudio](https://lmstudio.ai/). Give it a topic and it will generate a web search query, gather web search results, summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, and repeat for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used to generate the summary.
+Local Deep Researcher is a fully local web research assistant that uses any LLM hosted by local model servers (such as Ollama, LMStudio, or other inference servers). Give it a topic and it will generate a web search query, gather web search results, summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, and repeat for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used to generate the summary.
 
 ## 📸 Screenshots
 
@@ -69,14 +69,14 @@ Short summary video:
   - **Improved Documentation**: Comprehensive screenshots and usage examples
   - **Bug Fixes**: Resolved all major UI/UX issues and performance bottlenecks
 
-* 8/6/25: Added support for tool calling and [gpt-oss](https://openai.com/index/introducing-gpt-oss/). 
+* 8/6/25: Added support for tool calling and structured outputs for various model formats. 
 
-> ⚠️ **WARNING (8/6/25)**: The `gpt-oss` models do not support JSON mode in Ollama. Select `use_tool_calling` in the configuration to use tool calling instead of JSON mode.
+> ⚠️ **WARNING**: Some models do not support JSON mode. Select `use_tool_calling` in the configuration to use tool calling instead of JSON mode for such models.
 
 ## 📺 Video Tutorials
 
 See it in action or build it yourself? Check out these helpful video tutorials:
-- [Overview of Local Deep Researcher with R1](https://www.youtube.com/watch?v=sGUjmyfof4Q) - Load and test [DeepSeek R1](https://api-docs.deepseek.com/news/news250120) [distilled models](https://ollama.com/library/deepseek-r1).
+- [Overview of Local Deep Researcher with reasoning models](https://www.youtube.com/watch?v=sGUjmyfof4Q) - Load and test various reasoning-optimized models.
 - [Building Local Deep Researcher from Scratch](https://www.youtube.com/watch?v=XGuTzHoqlj8) - Overview of how this is built.
 
 ## 🚀 Web Interface Quickstart
@@ -86,9 +86,9 @@ For the easiest experience, use the built-in web interface:
 ### Quick Setup
 1. **Install and start Ollama**:
 ```bash
-# Install Ollama from https://ollama.ai
-ollama serve
-ollama pull llama:latest  # or any other model
+# Install your preferred model server
+# Start the model server
+# Load your preferred model
 ```
 
 2. **Clone and run**:
@@ -106,7 +106,7 @@ python app.py
 ### Web Interface Features
 
 #### 🎛️ Configuration Panel
-- **Model Selection**: Automatically detects installed Ollama models
+- **Model Selection**: Automatically detects available local models
 - **Search Provider**: Choose from Tavily, DuckDuckGo, arXiv, SearXNG, Perplexity
 - **Research Depth**: 1-5 loops (3 recommended for thorough research)
 - **Advanced Mode**: Multi-source search and specialized model configuration
@@ -131,7 +131,7 @@ Enable for enhanced capabilities:
 - **Perplexity**: AI-enhanced search results
 
 ### Example Research Flow
-1. Select model: Your preferred Ollama model
+1. Select model: Your preferred local model
 2. Enable Advanced Mode
 3. Select sources: `Tavily + arXiv`
 4. Set depth: `3 loops`
@@ -153,22 +153,23 @@ Then edit the `.env` file to customize the environment variables according to yo
 cp .env.example .env
 ```
 
-### Selecting local model with Ollama
+### Selecting local model
 
-1. Download the Ollama app for Mac [here](https://ollama.com/download).
+1. Download your preferred model server application.
 
-2. Pull a local LLM from [Ollama](https://ollama.com/search). As an [example](https://ollama.com/library/deepseek-r1:8b):
+2. Pull a local LLM from your model server:
 ```shell
-ollama pull deepseek-r1  # or latest version
+# Example command to pull a model
+# Syntax depends on your model server
 ```
 
-3. Optionally, update the `.env` file with the following Ollama configuration settings. 
+3. Optionally, update the `.env` file with your model server configuration settings. 
 
 * If set, these values will take precedence over the defaults set in the `Configuration` class in `configuration.py`. 
 ```shell
-LLM_PROVIDER=ollama
-OLLAMA_BASE_URL="http://localhost:11434" # Ollama service endpoint, defaults to `http://localhost:11434` 
-LOCAL_LLM=model # the model to use, defaults to `llama3.2` if not set
+LLM_PROVIDER=your_provider
+MODEL_SERVER_URL="http://localhost:11434" # Model server endpoint
+LOCAL_LLM=your_model # the model to use
 ```
 
 ### Selecting local model with LMStudio
@@ -269,7 +270,7 @@ Give the assistant a topic for research, and you can visualize its process!
 
 ### Model Compatibility Note
 
-When selecting a local LLM, set steps use structured JSON output. Some models may have difficulty with this requirement, and the assistant has fallback mechanisms to handle this. For example, certain DeepSeek R1 models may have difficulty producing required JSON output, and the assistant will use a fallback mechanism to handle this.
+When selecting a local LLM, set steps use structured JSON output. Some models may have difficulty with this requirement, and the assistant has fallback mechanisms to handle this.
   
 ### Browser Compatibility Note
 
@@ -284,7 +285,7 @@ When accessing the LangGraph Studio UI:
 ## How it works
 
 Local Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.). This approach will decompose a query into sub-queries, retrieve documents for each one, answer the sub-query, and then build on the answer by retrieving docs for the second sub-query. Here, we do similar:
-- Given a user-provided topic, use a local LLM (via [Ollama](https://ollama.com/search) or [LMStudio](https://lmstudio.ai/)) to generate a web search query
+- Given a user-provided topic, use a local LLM (via your model server) to generate a web search query
 - Uses a search engine / tool to find relevant sources
 - Uses LLM to summarize the findings from web search related to the user-provided research topic
 - Then, it uses the LLM to reflect on the summary, identifying knowledge gaps
@@ -318,7 +319,7 @@ There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#depl
 - ✅ **Web interface** with responsive design and real-time updates
 - ✅ **Export functionality** (Markdown download)
 - ✅ **Research history** with saved previous searches
-- ✅ **Dynamic model detection** from Ollama
+- ✅ **Dynamic model detection** from local model servers
 - ✅ **Configurable research depth** (1-5 loops)
 - ✅ **Verbose debugging** with expandable activity logs
 
@@ -379,11 +380,11 @@ The Local Deep Researcher project is evolving into a comprehensive AI research p
 | Feature | Current (Local) | LAN Multi-Model | Cloud Multi-Provider |
 |---------|----------------|-----------------|---------------------|
 | **Deployment** | Single machine | LAN distributed | Cloud-native |
-| **Model Access** | Local Ollama models | Multiple LAN models | Major cloud providers |
+| **Model Access** | Local models | Multiple LAN models | Major cloud providers |
 | **Scaling** | Limited by hardware | Horizontal LAN scaling | Auto-scaling cloud |
 | **Cost** | Hardware only | Hardware + power | Pay-per-use |
 | **Privacy** | Full local control | LAN-contained | Provider dependent |
-| **Model Variety** | Ollama catalog | Custom + Ollama + vLLM | Latest models from all major providers |
+| **Model Variety** | Local model catalog | Multiple model servers | Latest models from all major providers |
 | **Research Quality** | Single model | Multi-model consensus | Best-in-class models |
 | **Target Users** | Individuals, small teams | Research labs, enterprises | Global enterprises |
 
@@ -393,7 +394,7 @@ The Local Deep Researcher project is evolving into a comprehensive AI research p
 Transform your local network into a powerful distributed AI research system by orchestrating multiple models across different machines.
 
 **Key Capabilities:**
-- **Automatic Model Discovery**: Detect Ollama, vLLM, and custom inference servers across your LAN
+- **Automatic Model Discovery**: Detect various model inference servers across your LAN
 - **Intelligent Load Balancing**: Distribute tasks based on model capabilities and system load
 - **Multi-Model Ensemble Research**: Use multiple models for consensus and enhanced quality
 - **Specialized Task Assignment**: Route different research aspects to optimal models
@@ -496,7 +497,7 @@ https://github.com/PacoVK/ollama-deep-researcher-ts
 
 ## Running as a Docker container
 
-The included `Dockerfile` only runs LangChain Studio with local-deep-researcher as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable. Optionally you can also specify the Ollama model to use by providing the `LOCAL_LLM` environment variable.
+The included `Dockerfile` only runs LangChain Studio with local-deep-researcher as a service, but does not include a model server as a dependant service. You must run your model server separately and configure the appropriate environment variables.
 
 Clone the repo and build an image:
 ```
@@ -508,9 +509,9 @@ Run the container:
 $ docker run --rm -it -p 2024:2024 \
   -e SEARCH_API="tavily" \ 
   -e TAVILY_API_KEY="tvly-***YOUR_KEY_HERE***" \
-  -e LLM_PROVIDER=ollama \
-  -e OLLAMA_BASE_URL="http://host.docker.internal:11434/" \
-  -e LOCAL_LLM="llama3.2" \  
+  -e LLM_PROVIDER=your_provider \
+  -e MODEL_SERVER_URL="http://host.docker.internal:11434/" \
+  -e LOCAL_LLM="your_model" \  
   local-deep-researcher
 ```
 

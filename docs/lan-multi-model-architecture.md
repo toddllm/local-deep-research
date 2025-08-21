@@ -13,7 +13,7 @@ The LAN Multi-Model Deep Researcher extends the local deep research capabilities
 ### 1. Model Discovery and Management
 
 #### Automatic LAN Model Discovery
-- **Ollama Discovery**: Auto-detect Ollama instances across LAN via service discovery (mDNS/Bonjour)
+- **Model Server Discovery**: Auto-detect model inference servers across LAN via service discovery (mDNS/Bonjour)
 - **vLLM Discovery**: Detect vLLM OpenAI-compatible API endpoints on network
 - **Custom Model Servers**: Support for custom inference servers (FastAPI, TensorRT-LLM, etc.)
 - **Health Monitoring**: Continuous health checks and performance monitoring of discovered models
@@ -41,7 +41,7 @@ Model Registry:
 Query Types and Model Assignment:
 - Literature Search: Fast, efficient smaller models
 - Analysis & Reasoning: Larger reasoning-optimized models
-- Code Analysis: Specialized code models (Code Llama variants, DeepSeek-Coder)
+- Code Analysis: Specialized code-optimized models
 - Scientific Writing: Academic-focused and domain-specific models
 - Summarization: Optimized smaller models for speed
 ```
@@ -118,7 +118,7 @@ class ModelNode:
     def __init__(self):
         self.node_id = uuid.uuid4()
         self.endpoint = "http://192.168.1.x:11434"
-        self.models = ["llama3.1:70b", "qwen2.5:32b"]
+        self.models = ["large-model", "medium-model"]
         self.capabilities = ["reasoning", "analysis", "coding"]
         self.hardware = {"gpu": "RTX 4090", "memory": "32GB"}
         self.status = "active"
@@ -167,7 +167,7 @@ class DistributedResearcher:
 # lan_config.yaml
 model_discovery:
   enabled: true
-  protocols: ["ollama", "vllm", "openai_compatible"]
+  protocols: ["model_server", "inference_api", "openai_compatible"]
   scan_range: "192.168.1.0/24"
   update_interval: 30  # seconds
   
@@ -253,6 +253,6 @@ model_preferences:
 - **UI**: React/Vue.js for advanced dashboard
 
 ### Compatibility
-- **Ollama**: Full compatibility with existing Ollama deployments
+- **Model Servers**: Full compatibility with popular model serving frameworks
 - **vLLM**: Support for OpenAI-compatible API endpoints
 - **Custom**: Plugin system for custom inference servers
