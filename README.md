@@ -11,10 +11,39 @@ Local Deep Researcher is an advanced AI research tool that combines multiple sea
 - **📊 Real-time Progress Tracking**: Detailed activity logs with verbose debugging information
 - **✅ Intelligent Source Validation**: AI-powered relevance scoring and quality filtering
 - **🚀 Modern Web Interface**: Responsive UI with real-time updates and export capabilities
+- **🔍 Enhanced Query Generation**: Topic-specific optimization with domain expertise
+- **🔄 Source Deduplication**: Prevents repetitive sources across research loops
+- **📚 Academic Paper Scoring**: Specialized relevance evaluation for arXiv papers
+- **💾 Memory Monitoring**: Real-time memory usage tracking and optimization
+- **🧠 Query History Learning**: Iterative query refinement based on previous searches
 
 ## Overview
 
 Local Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search) or [LMStudio](https://lmstudio.ai/). Give it a topic and it will generate a web search query, gather web search results, summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, and repeat for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used to generate the summary.
+
+## 📸 Screenshots
+
+### Initial Interface
+![Homepage](screenshots/homepage.png)
+*Clean, intuitive interface with research topic input and configuration options*
+
+### Advanced Mode Configuration
+![Advanced Mode](screenshots/advanced-mode.png)
+*Advanced mode enables multi-source search and specialized model configuration*
+
+### Multi-Source Search Setup
+![Configured Search](screenshots/configured-search.png)
+*Select multiple search sources for comprehensive research coverage*
+
+### Research in Progress
+![Research Progress](screenshots/research-in-progress.png)
+*Real-time progress tracking with detailed activity logs and memory monitoring*
+
+### Detailed Activity Logs
+![Activity Logs](screenshots/activity-logs.png)
+*Comprehensive logging with expandable details, source validation scores, and debug information*
+
+---
 
 ![ollama-deep-research](https://github.com/user-attachments/assets/1c6b28f8-6b64-42ba-a491-1ab2875d50ea)
 
@@ -22,6 +51,15 @@ Short summary video:
 <video src="https://github.com/user-attachments/assets/02084902-f067-4658-9683-ff312cab7944" controls></video>
 
 ## 🔥 Updates 
+
+* **8/21/25**: Major improvements and optimizations:
+  - **Enhanced Query Generation**: Implemented topic-specific optimization with domain expertise, avoiding generic queries
+  - **Source Deduplication**: Added URL tracking across research loops to prevent repetitive sources
+  - **Academic Paper Scoring**: Specialized relevance evaluation for arXiv papers with enhanced criteria
+  - **Memory Monitoring**: Real-time memory usage tracking and optimization for resource-constrained environments
+  - **Query History Learning**: Iterative query refinement based on previous search results
+  - **Improved Documentation**: Comprehensive screenshots and usage examples
+  - **Bug Fixes**: Resolved all major UI/UX issues and performance bottlenecks
 
 * 8/6/25: Added support for tool calling and [gpt-oss](https://openai.com/index/introducing-gpt-oss/). 
 
@@ -267,14 +305,22 @@ There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#depl
 ### Core Features
 - ✅ **Multi-source search aggregation** (Tavily + arXiv + DuckDuckGo + SearXNG + Perplexity)
 - ✅ **Advanced model configuration** (separate models for query generation and summarization)
-- ✅ **Real-time progress tracking** with detailed activity logs
-- ✅ **Source validation** with AI-powered relevance scoring
+- ✅ **Real-time progress tracking** with detailed activity logs and memory monitoring
+- ✅ **Source validation** with AI-powered relevance scoring (0.0-1.0 scale)
 - ✅ **Web interface** with responsive design and real-time updates
 - ✅ **Export functionality** (Markdown download)
 - ✅ **Research history** with saved previous searches
 - ✅ **Dynamic model detection** from Ollama
 - ✅ **Configurable research depth** (1-5 loops)
 - ✅ **Verbose debugging** with expandable activity logs
+
+### Recent Improvements (August 2025)
+- ✅ **Enhanced Query Generation**: Topic-specific optimization with domain expertise
+- ✅ **Source Deduplication**: URL tracking prevents repetitive sources across loops
+- ✅ **Academic Paper Enhancement**: Specialized arXiv relevance scoring with publication criteria
+- ✅ **Memory Optimization**: Real-time monitoring and resource-efficient operation
+- ✅ **Query Learning**: Historical query analysis for progressive refinement
+- ✅ **Performance Optimization**: Reduced redundancy and improved efficiency
 
 ### Search Providers
 - ✅ **Tavily**: High-quality web search with full content extraction
@@ -292,21 +338,25 @@ There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#depl
 
 ## 🐛 Known Issues
 
-The following issues have been identified and will be addressed in future updates:
+The following issues have been addressed in the latest update:
 
-### Current Issues
-1. **Query Generation**: Generic fallback queries ("Tell me more about...") instead of optimized search terms
-2. **Source Repetition**: Same sources may be retrieved across multiple research loops
-3. **Academic Paper Relevance**: arXiv results sometimes return tangentially related papers
-4. **Search Query Optimization**: AI-generated queries could be more specific and targeted
-5. **Memory Usage**: Large models may consume significant RAM during research
+### ✅ Recently Fixed
+1. ~~**Query Generation**: Generic fallback queries ("Tell me more about...")~~ → **FIXED**: Implemented topic-specific optimization
+2. ~~**Source Repetition**: Same sources retrieved across multiple loops~~ → **FIXED**: Added URL tracking and deduplication
+3. ~~**Academic Paper Relevance**: arXiv results sometimes tangentially related~~ → **FIXED**: Enhanced relevance scoring for academic papers
+4. ~~**Search Query Optimization**: AI-generated queries too generic~~ → **FIXED**: Domain-specific query strategies
+5. ~~**Memory Usage**: Large models consuming significant RAM~~ → **FIXED**: Real-time memory monitoring and optimization
 
-### Planned Improvements
-- Better query generation with topic-specific optimization
-- Enhanced source diversity across research loops
-- Improved relevance scoring for academic papers
-- Query refinement based on previous search results
-- Memory optimization for resource-constrained environments
+### Current Minor Issues
+1. **Model Loading Time**: Initial model loading can be slow for large models
+2. **Browser Compatibility**: Some advanced features work best in modern browsers
+3. **API Rate Limits**: External APIs may have usage limits for heavy research sessions
+
+### Future Enhancements
+- **Multi-language Support**: Research in multiple languages
+- **Custom Source Integration**: Add custom search APIs
+- **Research Templates**: Pre-configured templates for different research types
+- **Collaborative Features**: Share and collaborate on research projects
 
 ## 🔄 Alternative Implementations
 

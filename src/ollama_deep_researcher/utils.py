@@ -57,6 +57,7 @@ def deduplicate_and_format_sources(
     search_response: Union[Dict[str, Any], List[Dict[str, Any]]],
     max_tokens_per_source: int,
     fetch_full_page: bool = False,
+    seen_urls: set = None,
 ) -> str:
     """
     Format and deduplicate search responses from various search APIs.
@@ -92,11 +93,15 @@ def deduplicate_and_format_sources(
             "Input must be either a dict with 'results' or a list of search results"
         )
 
-    # Deduplicate by URL
+    # Deduplicate by URL and filter out previously seen URLs
     unique_sources = {}
+    if seen_urls is None:
+        seen_urls = set()
+    
     for source in sources_list:
-        if source["url"] not in unique_sources:
-            unique_sources[source["url"]] = source
+        url = source["url"]
+        if url not in unique_sources and url not in seen_urls:
+            unique_sources[url] = source
 
     # Format output
     formatted_text = "Sources:\n\n"

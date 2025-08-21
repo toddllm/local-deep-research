@@ -159,9 +159,18 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     
     # Format the prompt
     current_date = get_current_date()
+    
+    # Add query history context if available
+    query_history_context = ""
+    if state.query_history and len(state.query_history) > 0:
+        query_history_context = f"\n\n<PREVIOUS_QUERIES>\nPrevious search queries used in this research:\n"
+        for i, prev_query in enumerate(state.query_history, 1):
+            query_history_context += f"{i}. {prev_query}\n"
+        query_history_context += "\nGenerate a NEW, different query that explores unexplored aspects or addresses knowledge gaps not covered by previous searches.\n</PREVIOUS_QUERIES>"
+    
     formatted_prompt = query_writer_instructions.format(
         current_date=current_date, research_topic=state.research_topic
-    )
+    ) + query_history_context
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
@@ -196,7 +205,7 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     # Check for custom query model
     query_model = config.get("configurable", {}).get("query_model")
     
-    return generate_search_query_with_structured_output(
+    result = generate_search_query_with_structured_output(
         configurable=configurable,
         messages=messages,
         tool_class=Query,
@@ -205,6 +214,12 @@ def generate_query(state: SummaryState, config: RunnableConfig):
         json_query_field="query",
         query_model=query_model,
     )
+    
+    # Add generated query to history for future reference
+    if "search_query" in result:
+        result["query_history"] = [result["search_query"]]
+    
+    return result
 
 
 def web_research(state: SummaryState, config: RunnableConfig):
@@ -320,7 +335,15 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 all_search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
+            
+            # Update seen URLs with new URLs from this search
+            for result_set in all_search_results:
+                if "results" in result_set:
+                    for result in result_set["results"]:
+                        if "url" in result:
+                            state.seen_urls.add(result["url"])
             formatted_sources = "\n".join(all_formatted_sources)
             
             total_results = sum(len(r.get('results', [])) for r in all_search_results)
@@ -365,6 +388,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
         elif search_api == "perplexity":
             search_results = perplexity_search(
@@ -374,6 +398,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
         elif search_api == "duckduckgo":
             search_results = duckduckgo_search(
@@ -385,6 +410,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
         elif search_api == "searxng":
             search_results = searxng_search(
@@ -396,6 +422,7 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
         elif search_api == "arxiv":
             search_results = arxiv_search(
@@ -407,9 +434,16 @@ def web_research(state: SummaryState, config: RunnableConfig):
                 search_results,
                 max_tokens_per_source=MAX_TOKENS_PER_SOURCE,
                 fetch_full_page=configurable.fetch_full_page,
+                seen_urls=state.seen_urls,
             )
         else:
             raise ValueError(f"Unsupported search API: {configurable.search_api}")
+
+        # Update seen URLs with new URLs from this single search
+        if search_results and "results" in search_results:
+            for result in search_results["results"]:
+                if "url" in result:
+                    state.seen_urls.add(result["url"])
 
         return {
             "sources_gathered": [format_sources(search_results)],
@@ -455,26 +489,44 @@ def validate_sources(state: SummaryState, config: RunnableConfig):
         {"source_count": len(most_recent_sources.split('* '))-1, "retry_count": current_retries}
     )
     
-    # Create structured validation prompt
+    # Create structured validation prompt with enhanced academic paper evaluation
     validation_prompt = f"""
     Analyze these web search results for research on: {state.research_topic}
     
     Sources to evaluate:
     {most_recent_sources}
     
-    For EACH source, provide a relevance score from 0.0 to 1.0:
-    - 0.0-0.3: Completely irrelevant (dictionaries, unrelated topics)
-    - 0.4-0.6: Somewhat relevant (general news, tangentially related)
-    - 0.7-0.9: Highly relevant (specific to topic, authoritative)
+    For EACH source, provide a relevance score from 0.0 to 1.0 using these enhanced criteria:
+    
+    GENERAL SOURCES (0.0-1.0):
+    - 0.0-0.3: Completely irrelevant (dictionaries, unrelated topics, spam)
+    - 0.4-0.6: Somewhat relevant (general news, tangentially related content)
+    - 0.7-0.9: Highly relevant (specific to topic, authoritative sources)
     - 1.0: Perfect match (expert source directly addressing the topic)
+    
+    ACADEMIC PAPERS (arXiv, journal articles):
+    Apply additional evaluation criteria:
+    - Title relevance: Does the paper title directly address the research topic?
+    - Abstract quality: Does the abstract indicate the paper contains substantial relevant content?
+    - Publication date: Recent papers (within 2-3 years) may be more valuable for emerging topics
+    - Author credentials: Papers from established researchers or institutions get higher scores
+    - Paper type: Original research papers score higher than surveys unless surveys are specifically needed
+    - Technical depth: Papers with sufficient technical detail score higher than superficial treatments
+    
+    For academic papers, boost scores by 0.1-0.2 if they are:
+    - Recent high-quality research directly on topic
+    - From reputable institutions or well-cited authors
+    - Contain novel findings or comprehensive analysis
     
     Return your evaluation in JSON format:
     {{
         "sources": [
-            {{"url": "...", "title": "...", "relevance_score": 0.0, "reason": "..."}},
+            {{"url": "...", "title": "...", "relevance_score": 0.0, "reason": "...", "source_type": "academic/web/news"}},
         ],
         "overall_quality": "low/medium/high",
-        "recommendation": "proceed/retry/refine_query"
+        "recommendation": "proceed/retry/refine_query",
+        "academic_paper_count": 0,
+        "high_quality_academic_sources": 0
     }}
     """
     

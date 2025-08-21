@@ -75,6 +75,21 @@ class Configuration(BaseModel):
         title="Maximum Validation Retries",
         description="Maximum number of search retries when sources fail validation",
     )
+    enable_memory_monitoring: bool = Field(
+        default=True,
+        title="Enable Memory Monitoring",
+        description="Monitor memory usage during research",
+    )
+    memory_limit_mb: Optional[int] = Field(
+        default=None,
+        title="Memory Limit (MB)",
+        description="Optional memory limit in MB (None for no limit)",
+    )
+    optimize_for_low_memory: bool = Field(
+        default=False,
+        title="Optimize for Low Memory",
+        description="Use memory-efficient settings for resource-constrained environments",
+    )
 
     @classmethod
     def from_runnable_config(

@@ -6,6 +6,7 @@ import os
 import json
 import threading
 import uuid
+import psutil
 from pathlib import Path
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session
@@ -37,15 +38,34 @@ def run_research_task(task_id, topic, custom_config=None):
         research_tasks[task_id]['status'] = 'running'
         research_tasks[task_id]['started_at'] = datetime.now().isoformat()
         research_tasks[task_id]['activity_log'] = []
+        research_tasks[task_id]['memory_stats'] = []
         
         def log_activity(message, detail=None):
             """Log activity with timestamp"""
+            # Get memory usage
+            memory_info = None
+            try:
+                process = psutil.Process()
+                memory_mb = process.memory_info().rss / 1024 / 1024  # Convert to MB
+                memory_info = {
+                    'memory_mb': round(memory_mb, 1),
+                    'memory_percent': round(process.memory_percent(), 1)
+                }
+                research_tasks[task_id]['memory_stats'].append({
+                    'time': datetime.now().isoformat(),
+                    'memory_mb': memory_mb
+                })
+            except:
+                pass
+            
             entry = {
                 'time': datetime.now().isoformat(),
                 'message': message
             }
             if detail:
                 entry['detail'] = detail
+            if memory_info:
+                entry['memory'] = memory_info
             research_tasks[task_id]['activity_log'].append(entry)
             research_tasks[task_id]['progress'] = message
         

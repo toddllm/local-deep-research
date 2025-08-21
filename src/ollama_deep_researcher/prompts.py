@@ -6,7 +6,7 @@ def get_current_date():
     return datetime.now().strftime("%B %d, %Y")
 
 
-query_writer_instructions = """Your goal is to generate a targeted web search query.
+query_writer_instructions = """Your goal is to generate a highly targeted, specific web search query that will yield high-quality results.
 
 <CONTEXT>
 Current date: {current_date}
@@ -17,12 +17,30 @@ Please ensure your queries account for the most current information available as
 {research_topic}
 </TOPIC>
 
+<QUERY_OPTIMIZATION_GUIDELINES>
+1. AVOID generic patterns like "Tell me more about..." or "What is..."
+2. Use specific terminology and technical language when appropriate
+3. Include relevant time constraints (e.g., "2024", "latest", "recent developments")
+4. Consider the topic domain and use field-specific keywords
+5. Focus on actionable, specific aspects rather than broad overviews
+6. Include measurement terms when relevant (performance, metrics, benchmarks)
+7. Use quotation marks for exact phrases when beneficial
+8. Consider different perspectives (technical, business, academic, practical)
+</QUERY_OPTIMIZATION_GUIDELINES>
+
+<DOMAIN_SPECIFIC_STRATEGIES>
+- Technology/Software: Include version numbers, frameworks, implementation details
+- Science/Research: Include methodology, recent studies, peer-reviewed sources
+- Business/Finance: Include market data, trends, financial metrics, case studies
+- Medical/Health: Include clinical trials, evidence-based practices, recent guidelines
+- Academic: Include author names, institution affiliations, publication dates
+</DOMAIN_SPECIFIC_STRATEGIES>
+
 <EXAMPLE>
-Example output:
-{{
-    "query": "machine learning transformer architecture explained",
-    "rationale": "Understanding the fundamental structure of transformer models"
-}}
+Topic: "machine learning transformer architecture"
+Poor query: "what is transformer architecture"
+Good query: "transformer neural network architecture attention mechanism implementation 2024"
+Rationale: "Specific technical terms, includes recent developments, focuses on implementation details"
 </EXAMPLE>"""
 
 json_mode_query_instructions = """<FORMAT>

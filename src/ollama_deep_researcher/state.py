@@ -15,6 +15,8 @@ class SummaryState:
     validation_retry_needed: bool = field(default=False)  # Need to retry search
     validation_retries: int = field(default=0)  # Number of validation retries
     validation_failed: bool = field(default=False)  # Validation completely failed
+    seen_urls: set = field(default_factory=set)  # Track URLs across research loops
+    query_history: Annotated[list, operator.add] = field(default_factory=list)  # Previous queries for refinement
 
 
 @dataclass(kw_only=True)
