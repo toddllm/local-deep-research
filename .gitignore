@@ -1,0 +1,7 @@
+.venv/
+research_output_*.md
+qdrant_storage/
+ollama_deep_researcher.egg-info/
+src/ollama_deep_researcher/__pycache__/
+*.pyc
+__pycache__/

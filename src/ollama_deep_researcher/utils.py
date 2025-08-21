@@ -1,6 +1,7 @@
 import os
 import httpx
 import requests
+import arxiv
 from typing import Dict, Any, List, Union, Optional
 
 from markdownify import markdownify
@@ -385,3 +386,50 @@ def perplexity_search(
         )
 
     return {"results": results}
+
+
+@traceable
+def arxiv_search(
+    query: str, max_results: int = 3, fetch_full_page: bool = False
+) -> Dict[str, List[Dict[str, Any]]]:
+    """
+    Search arXiv for academic papers and return formatted results.
+    
+    Uses the arXiv API to search for academic papers. No API key required.
+    
+    Args:
+        query (str): The search query to execute
+        max_results (int, optional): Maximum number of results to return. Defaults to 3.
+        fetch_full_page (bool, optional): Whether to fetch full paper abstract. Defaults to False.
+    
+    Returns:
+        Dict[str, List[Dict[str, Any]]]: Search response containing:
+            - results (list): List of search result dictionaries, each containing:
+                - title (str): Title of the paper
+                - url (str): URL to the arXiv paper
+                - content (str): Paper abstract
+                - raw_content (str): Full abstract or same as content
+    """
+    try:
+        # Create arXiv search
+        search = arxiv.Search(
+            query=query,
+            max_results=max_results,
+            sort_by=arxiv.SortCriterion.Relevance
+        )
+        
+        results = []
+        for paper in search.results():
+            # Format the result
+            result = {
+                "title": paper.title,
+                "url": paper.entry_id,
+                "content": paper.summary[:500] + "..." if len(paper.summary) > 500 else paper.summary,
+                "raw_content": paper.summary if fetch_full_page else paper.summary[:500],
+            }
+            results.append(result)
+        
+        return {"results": results}
+    except Exception as e:
+        print(f"Error in arXiv search: {str(e)}")
+        return {"results": []}

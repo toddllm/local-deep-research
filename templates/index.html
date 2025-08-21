@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Deep Researcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            opacity: 0.95;
+            font-size: 1.1em;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .config-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .config-control {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .config-control label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .config-control select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .config-control select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .config-control select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-update {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-update:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .chip {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chip:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Activity Timeline Styles */
+        .activity-timeline {
+            position: relative;
+            padding-left: 40px;
+            max-height: 500px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .activity-timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInLeft 0.5s forwards;
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            z-index: 1;
+        }
+        
+        .timeline-dot.active {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+        }
+        
+        .timeline-content {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .timeline-time {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-message {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-detail {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Verbose Details Section */
+        .verbose-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f3f7;
+            border-radius: 10px;
+        }
+        
+        .verbose-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .verbose-toggle:hover {
+            background: #f8f9fa;
+        }
+        
+        .verbose-toggle-icon {
+            transition: transform 0.3s;
+        }
+        
+        .verbose-toggle.expanded .verbose-toggle-icon {
+            transform: rotate(90deg);
+        }
+        
+        .verbose-content {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .verbose-content.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 400px;
+            }
+        }
+        
+        .verbose-entry {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Results Formatting */
+        .result-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .result-content h2 {
+            color: #667eea;
+            margin: 35px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #e0e0e0;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+        
+        .result-content h3 {
+            color: #764ba2;
+            margin: 25px 0 15px;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+        
+        .result-content p {
+            margin-bottom: 18px;
+            text-align: justify;
+            text-indent: 1.5em;
+        }
+        
+        .result-content p:first-of-type {
+            text-indent: 0;
+        }
+        
+        .result-content p:first-of-type::first-letter {
+            font-size: 3em;
+            font-weight: bold;
+            float: left;
+            line-height: 1;
+            margin-right: 8px;
+            color: #667eea;
+        }
+        
+        /* Source Cards */
+        .sources-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 3px solid #e0e0e0;
+        }
+        
+        .sources-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .source-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .source-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .source-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .source-number {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .source-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .source-url {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+            display: block;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 8px;
+            transition: all 0.3s;
+        }
+        
+        .source-url:hover {
+            background: #e9ecef;
+            text-decoration: underline;
+        }
+        
+        /* Status Indicators */
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .status-badge.running {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        
+        .status-badge.completed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Advanced Settings */
+        .advanced-toggle {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        
+        .advanced-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .advanced-settings.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .advanced-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔬 Local Deep Researcher</h1>
+            <p class="subtitle">AI-Powered Research Assistant with Source Validation</p>
+        </header>
+
+        <!-- Configuration Panel -->
+        <div class="card">
+            <h3>⚙️ Configuration</h3>
+            
+            <div class="config-controls">
+                <div class="config-control">
+                    <label for="modelSelect">LLM Model:</label>
+                    <select id="modelSelect">
+                        <option value="">Loading models...</option>
+                    </select>
+                </div>
+                
+                <div class="config-control">
+                    <label for="searchProviderSelect">Search Provider:</label>
+                    <select id="searchProviderSelect">
+                        <option value="">Loading providers...</option>
+                    </select>
+                </div>
+                
+                <div class="config-control">
+                    <label for="loopsSelect">Research Depth:</label>
+                    <select id="loopsSelect">
+                        <option value="1">Quick (1 loop)</option>
+                        <option value="2">Standard (2 loops)</option>
+                        <option value="3" selected>Thorough (3 loops)</option>
+                        <option value="5">Deep (5 loops)</option>
+                    </select>
+                </div>
+                
+                <div class="config-control">
+                    <button class="btn btn-update" onclick="updateConfiguration()">Update Settings</button>
+                </div>
+            </div>
+            
+            <!-- Advanced Model Configuration -->
+            <div id="advancedModelConfig" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+                <h4 style="margin-bottom: 10px; color: #007bff;">⚙️ Advanced Model Configuration</h4>
+                <div class="config-controls">
+                    <div class="config-control">
+                        <label for="queryModelSelect">Query Generation Model:</label>
+                        <select id="queryModelSelect">
+                            <option value="">Use main model</option>
+                        </select>
+                    </div>
+                    <div class="config-control">
+                        <label for="summaryModelSelect">Summarization Model:</label>
+                        <select id="summaryModelSelect">
+                            <option value="">Use main model</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Mode Toggle -->
+            <div class="advanced-toggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="advancedMode" onchange="toggleAdvancedMode()">
+                    <span class="slider"></span>
+                </label>
+                <label for="advancedMode"><strong>Advanced Mode</strong> - Use Multiple Search Sources & Advanced Models</label>
+            </div>
+            
+            <!-- Advanced Settings -->
+            <div id="advancedSettings" class="advanced-settings">
+                <p style="margin-bottom: 10px; font-weight: 600;">Select Multiple Search Sources:</p>
+                <div class="checkbox-group" id="multiSourceGroup">
+                    <!-- Will be populated dynamically -->
+                </div>
+                <div class="advanced-info">
+                    ⚠️ <strong>Note:</strong> When advanced mode is enabled, the single search provider dropdown above is disabled. 
+                    The system will aggregate results from all selected sources for comprehensive research.
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Form -->
+        <div class="card">
+            <h2>🚀 Start New Research</h2>
+            <form id="researchForm">
+                <div style="margin-bottom: 15px;">
+                    <label for="topic" style="display: block; margin-bottom: 8px; font-weight: 600;">Research Topic:</label>
+                    <textarea 
+                        id="topic" 
+                        name="topic" 
+                        rows="3" 
+                        placeholder="Enter your research topic... (e.g., 'Recent advances in quantum computing and their impact on cryptography')"
+                        required
+                    ></textarea>
+                </div>
+                
+                <!-- Suggested Topics -->
+                <div style="margin-bottom: 20px;">
+                    <p style="margin-bottom: 10px; color: #666;">Quick suggestions:</p>
+                    <div class="suggestion-chips">
+                        <button type="button" class="chip" onclick="setTopic('Recent advances in quantum computing and cryptography')">
+                            🔐 Quantum Computing
+                        </button>
+                        <button type="button" class="chip" onclick="setTopic('AI agents and multi-agent systems: current state and future trends')">
+                            🤖 AI Agents
+                        </button>
+                        <button type="button" class="chip" onclick="setTopic('Latest developments in renewable energy storage technologies')">
+                            🔋 Energy Storage
+                        </button>
+                        <button type="button" class="chip" onclick="setTopic('Impact of large language models on software development')">
+                            💻 LLMs & Code
+                        </button>
+                        <button type="button" class="chip" onclick="setTopic('Latest arXiv papers on transformer architectures')">
+                            📚 arXiv Papers
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    🚀 Start Research
+                </button>
+            </form>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="progressSection" class="card" style="display: none;">
+            <h2>🔄 Research in Progress</h2>
+            
+            <div class="status-container">
+                <span class="status-badge running">
+                    <span class="spinner"></span>
+                    PROCESSING
+                </span>
+                <span id="progressText" style="flex: 1; color: #666;">Initializing research pipeline...</span>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 5%;"></div>
+            </div>
+            
+            <!-- Activity Timeline -->
+            <h3 style="margin-top: 30px; margin-bottom: 20px;">📊 Activity Timeline</h3>
+            <div class="activity-timeline" id="activityTimeline">
+                <!-- Timeline items will be added here -->
+            </div>
+            
+            <!-- Verbose Details Section -->
+            <div class="verbose-section">
+                <div class="verbose-toggle" onclick="toggleVerbose()" id="verboseToggle">
+                    <span class="verbose-toggle-icon">▶</span>
+                    <strong>Show Detailed Logs</strong>
+                    <span style="color: #666; font-size: 0.9em;">(Technical details for debugging)</span>
+                </div>
+                <div class="verbose-content" id="verboseContent">
+                    <!-- Verbose logs will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="card" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2 style="margin: 0; color: #28a745;">✅ Research Complete</h2>
+                    <h3 id="resultTopic" style="margin-top: 10px; color: #666;"></h3>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="copyResults()" class="btn btn-secondary">📋 Copy</button>
+                    <button onclick="downloadResults()" class="btn btn-secondary">⬇️ Download</button>
+                    <button onclick="newResearch()" class="btn btn-primary">🔄 New Research</button>
+                </div>
+            </div>
+            
+            <div class="result-content" id="resultContent">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Recent Research -->
+        <div class="card">
+            <h2>📚 Recent Research</h2>
+            <div id="recentList" style="margin-top: 15px;">
+                <p class="empty-state" style="text-align: center; color: #999; padding: 30px; font-style: italic;">
+                    No recent research yet. Start your first research above!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTaskId = null;
+        let checkInterval = null;
+        let availableModels = [];
+        let availableProviders = [];
+        let advancedModeEnabled = false;
+        let selectedMultiSources = [];
+        let progressPercent = 0;
+        let lastActivityCount = 0;
+        let verboseExpanded = false;
+
+        // Load configuration on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfiguration();
+            loadModels();
+            loadSearchProviders();
+            loadRecentResearch();
+        });
+
+        // Load available Ollama models
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                const modelSelect = document.getElementById('modelSelect');
+                
+                if (data.models && data.models.length > 0) {
+                    availableModels = data.models;
+                    modelSelect.innerHTML = '';
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        modelSelect.appendChild(option);
+                    });
+                    
+                    // Populate advanced model dropdowns
+                    const queryModelSelect = document.getElementById('queryModelSelect');
+                    const summaryModelSelect = document.getElementById('summaryModelSelect');
+                    
+                    [queryModelSelect, summaryModelSelect].forEach(select => {
+                        select.innerHTML = '<option value="">Use main model</option>';
+                        data.models.forEach(model => {
+                            const option = document.createElement('option');
+                            option.value = model;
+                            option.textContent = model;
+                            select.appendChild(option);
+                        });
+                    });
+                    
+                    // Set current model from config
+                    const configResponse = await fetch('/api/config');
+                    const config = await configResponse.json();
+                    if (config.local_llm) {
+                        modelSelect.value = config.local_llm;
+                    }
+                } else {
+                    modelSelect.innerHTML = '<option value="">No models available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+                document.getElementById('modelSelect').innerHTML = '<option value="">Error loading models</option>';
+            }
+        }
+
+        // Load available search providers
+        async function loadSearchProviders() {
+            try {
+                const response = await fetch('/api/search-providers');
+                const data = await response.json();
+                const providerSelect = document.getElementById('searchProviderSelect');
+                const multiSourceGroup = document.getElementById('multiSourceGroup');
+                
+                if (data.providers && data.providers.length > 0) {
+                    availableProviders = data.providers;
+                    
+                    // Populate single select
+                    providerSelect.innerHTML = '';
+                    data.providers.forEach(provider => {
+                        const option = document.createElement('option');
+                        option.value = provider;
+                        option.textContent = provider.charAt(0).toUpperCase() + provider.slice(1);
+                        if (provider === data.current) {
+                            option.selected = true;
+                        }
+                        providerSelect.appendChild(option);
+                    });
+                    
+                    // Populate multi-select checkboxes
+                    multiSourceGroup.innerHTML = '';
+                    data.providers.forEach(provider => {
+                        const checkboxItem = document.createElement('div');
+                        checkboxItem.className = 'checkbox-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `multi-${provider}`;
+                        checkbox.value = provider;
+                        checkbox.onchange = () => updateMultiSourceSelection();
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = `multi-${provider}`;
+                        label.textContent = provider.charAt(0).toUpperCase() + provider.slice(1);
+                        
+                        checkboxItem.appendChild(checkbox);
+                        checkboxItem.appendChild(label);
+                        multiSourceGroup.appendChild(checkboxItem);
+                    });
+                } else {
+                    providerSelect.innerHTML = '<option value="">No providers available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading search providers:', error);
+            }
+        }
+
+        // Toggle advanced mode
+        function toggleAdvancedMode() {
+            const checkbox = document.getElementById('advancedMode');
+            const advancedSettings = document.getElementById('advancedSettings');
+            const advancedModelConfig = document.getElementById('advancedModelConfig');
+            const searchProviderSelect = document.getElementById('searchProviderSelect');
+            advancedModeEnabled = checkbox.checked;
+            
+            if (advancedModeEnabled) {
+                advancedSettings.classList.add('show');
+                advancedModelConfig.style.display = 'block';
+                // Disable single provider dropdown
+                searchProviderSelect.disabled = true;
+            } else {
+                advancedSettings.classList.remove('show');
+                advancedModelConfig.style.display = 'none';
+                // Enable single provider dropdown
+                searchProviderSelect.disabled = false;
+                // Clear multi-source selections
+                selectedMultiSources = [];
+                document.querySelectorAll('#multiSourceGroup input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+            }
+        }
+
+        // Update multi-source selection
+        function updateMultiSourceSelection() {
+            selectedMultiSources = [];
+            const checkboxes = document.querySelectorAll('#multiSourceGroup input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                selectedMultiSources.push(cb.value);
+            });
+            
+            // If any sources are selected, ensure advanced mode is on
+            if (selectedMultiSources.length > 0 && !advancedModeEnabled) {
+                document.getElementById('advancedMode').checked = true;
+                toggleAdvancedMode();
+            }
+        }
+
+        // Toggle verbose logs
+        function toggleVerbose() {
+            verboseExpanded = !verboseExpanded;
+            const toggle = document.getElementById('verboseToggle');
+            const content = document.getElementById('verboseContent');
+            
+            if (verboseExpanded) {
+                toggle.classList.add('expanded');
+                content.classList.add('show');
+            } else {
+                toggle.classList.remove('expanded');
+                content.classList.remove('show');
+            }
+        }
+
+        // Update configuration
+        async function updateConfiguration() {
+            const model = document.getElementById('modelSelect').value;
+            const searchApi = document.getElementById('searchProviderSelect').value;
+            const loops = document.getElementById('loopsSelect').value;
+            
+            try {
+                const response = await fetch('/api/config/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        local_llm: model,
+                        search_api: searchApi,
+                        max_web_research_loops: parseInt(loops)
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification('Configuration updated successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Error updating configuration:', error);
+                showNotification('Failed to update configuration', 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Load configuration
+        async function loadConfiguration() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                if (config.max_loops) {
+                    document.getElementById('loopsSelect').value = config.max_loops;
+                }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+            }
+        }
+
+        // Set topic from suggestion chip
+        function setTopic(topic) {
+            document.getElementById('topic').value = topic;
+        }
+
+        // New research
+        function newResearch() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('topic').value = '';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('topic').disabled = false;
+        }
+
+        // Handle form submission
+        document.getElementById('researchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const topic = document.getElementById('topic').value.trim();
+            if (!topic) return;
+            
+            // Validate advanced mode
+            if (advancedModeEnabled && selectedMultiSources.length === 0) {
+                showNotification('Please select at least one search source in advanced mode', 'error');
+                return;
+            }
+            
+            // Reset progress
+            progressPercent = 0;
+            lastActivityCount = 0;
+            verboseExpanded = false;
+            document.getElementById('activityTimeline').innerHTML = '';
+            document.getElementById('verboseContent').innerHTML = '';
+            document.getElementById('progressBar').style.width = '5%';
+            
+            // Disable form
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('topic').disabled = true;
+            
+            // Show progress section
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            try {
+                // Get current configuration
+                const modelSelect = document.getElementById('modelSelect');
+                const searchProviderSelect = document.getElementById('searchProviderSelect');
+                const loopsSelect = document.getElementById('loopsSelect');
+                const queryModelSelect = document.getElementById('queryModelSelect');
+                const summaryModelSelect = document.getElementById('summaryModelSelect');
+                
+                // Prepare config object
+                const config = {
+                    local_llm: modelSelect.value,
+                    search_api: advancedModeEnabled ? selectedMultiSources[0] : searchProviderSelect.value,
+                    max_web_research_loops: parseInt(loopsSelect.value)
+                };
+                
+                // Add advanced model settings if enabled
+                if (advancedModeEnabled) {
+                    config.search_apis = selectedMultiSources;
+                    if (queryModelSelect.value) {
+                        config.query_model = queryModelSelect.value;
+                    }
+                    if (summaryModelSelect.value) {
+                        config.summarization_model = summaryModelSelect.value;
+                    }
+                }
+                
+                // Start research with configuration
+                const response = await fetch('/api/research', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        topic: topic,
+                        config: config
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.task_id) {
+                    currentTaskId = data.task_id;
+                    checkResearchStatus();
+                } else {
+                    showError('Failed to start research');
+                }
+            } catch (error) {
+                console.error('Error starting research:', error);
+                showError('Failed to start research');
+            }
+        });
+
+        // Add activity to timeline
+        function addTimelineItem(message, detail, time, isActive = false) {
+            const timeline = document.getElementById('activityTimeline');
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.style.animationDelay = `${lastActivityCount * 0.1}s`;
+            
+            const timeStr = time ? new Date(time).toLocaleTimeString() : new Date().toLocaleTimeString();
+            
+            item.innerHTML = `
+                <div class="timeline-dot ${isActive ? 'active' : ''}"></div>
+                <div class="timeline-content">
+                    <div class="timeline-time">${timeStr}</div>
+                    <div class="timeline-message">${message}</div>
+                    ${detail ? `<div class="timeline-detail">${detail}</div>` : ''}
+                </div>
+            `;
+            
+            timeline.appendChild(item);
+            
+            // Auto-scroll to bottom
+            timeline.scrollTop = timeline.scrollHeight;
+        }
+
+        // Add verbose log entry
+        function addVerboseEntry(message, detail, time, verbose) {
+            const verboseContent = document.getElementById('verboseContent');
+            const entry = document.createElement('div');
+            entry.className = 'verbose-entry';
+            
+            const timestamp = time ? new Date(time).toISOString() : new Date().toISOString();
+            let content = `[${timestamp}]\n${message}`;
+            if (detail) content += `\nDetails: ${detail}`;
+            if (verbose) content += `\n\nVerbose Data:\n${JSON.stringify(verbose, null, 2)}`;
+            
+            entry.textContent = content;
+            verboseContent.appendChild(entry);
+        }
+
+        // Check research status
+        function checkResearchStatus() {
+            checkInterval = setInterval(async () => {
+                if (!currentTaskId) {
+                    clearInterval(checkInterval);
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/research/${currentTaskId}`);
+                    const data = await response.json();
+                    
+                    // Update progress text
+                    const progressText = document.getElementById('progressText');
+                    if (data.progress) {
+                        progressText.textContent = data.progress;
+                    }
+                    
+                    // Update activity timeline (only add new items)
+                    if (data.activity_log && data.activity_log.length > lastActivityCount) {
+                        const newItems = data.activity_log.slice(lastActivityCount);
+                        newItems.forEach((entry, index) => {
+                            const isLast = (lastActivityCount + index === data.activity_log.length - 1) && data.status === 'running';
+                            addTimelineItem(entry.message, entry.detail, entry.time, isLast);
+                            
+                            // Add to verbose log
+                            addVerboseEntry(entry.message, entry.detail, entry.time, entry.verbose);
+                        });
+                        lastActivityCount = data.activity_log.length;
+                    }
+                    
+                    // Update progress bar smoothly
+                    if (data.status === 'running') {
+                        progressPercent = Math.min(progressPercent + 5, 90);
+                        document.getElementById('progressBar').style.width = progressPercent + '%';
+                    }
+                    
+                    if (data.status === 'completed') {
+                        clearInterval(checkInterval);
+                        document.getElementById('progressBar').style.width = '100%';
+                        
+                        // Update status badge
+                        const statusBadge = document.querySelector('.status-badge');
+                        statusBadge.className = 'status-badge completed';
+                        statusBadge.innerHTML = '✅ COMPLETED';
+                        
+                        setTimeout(() => {
+                            displayResults(data);
+                            document.getElementById('submitBtn').disabled = false;
+                            document.getElementById('topic').disabled = false;
+                            saveToRecent(data);
+                        }, 1000);
+                    } else if (data.status === 'failed') {
+                        clearInterval(checkInterval);
+                        
+                        // Update status badge
+                        const statusBadge = document.querySelector('.status-badge');
+                        statusBadge.className = 'status-badge failed';
+                        statusBadge.innerHTML = '❌ FAILED';
+                        
+                        showError(data.error || 'Research failed');
+                        document.getElementById('submitBtn').disabled = false;
+                        document.getElementById('topic').disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error checking status:', error);
+                }
+            }, 2000);
+        }
+
+        // Display results with better formatting
+        function displayResults(data) {
+            // Keep progress section visible but update it to show completed state
+            const progressSection = document.getElementById('progressSection');
+            progressSection.style.opacity = '0.9';  // Slight fade to show it's completed
+            
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            document.getElementById('resultTopic').textContent = data.topic;
+            
+            // Parse and format the result
+            let content = data.result;
+            
+            // Split content into sections
+            const sections = content.split(/(?=##\s)/);
+            let formattedHtml = '';
+            
+            sections.forEach(section => {
+                if (section.includes('### Sources:') || section.includes('###Sources:')) {
+                    // Handle sources section specially
+                    const [mainContent, sourcesContent] = section.split(/###\s*Sources:/);
+                    formattedHtml += formatContent(mainContent);
+                    
+                    // Format sources as a list with full URLs
+                    formattedHtml += '<div class="sources-section"><h3>📚 Research Sources</h3><ol class="source-list">';
+                    const sourceLines = sourcesContent.trim().split('\n');
+                    
+                    let sourceNumber = 1;
+                    sourceLines.forEach(line => {
+                        if (line.trim()) {
+                            // Parse markdown link format
+                            const linkMatch = line.match(/\*?\s*\[([^\]]+)\]\(([^)]+)\)/);
+                            if (linkMatch) {
+                                const [, title, url] = linkMatch;
+                                formattedHtml += `
+                                    <li class="source-item">
+                                        <div class="source-number">${sourceNumber}</div>
+                                        <div class="source-title">${title}</div>
+                                        <a href="${url}" target="_blank" class="source-url">${url}</a>
+                                    </li>
+                                `;
+                                sourceNumber++;
+                            } else if (line.includes(' : ')) {
+                                // Handle old format "Title : URL"
+                                const parts = line.split(' : ');
+                                if (parts.length >= 2) {
+                                    const title = parts[0].replace(/^\*\s*/, '');
+                                    const url = parts.slice(1).join(' : '); // Handle URLs with colons
+                                    formattedHtml += `
+                                        <li class="source-item">
+                                            <div class="source-number">${sourceNumber}</div>
+                                            <div class="source-title">${title}</div>
+                                            <a href="${url}" target="_blank" class="source-url">${url}</a>
+                                        </li>
+                                    `;
+                                    sourceNumber++;
+                                }
+                            }
+                        }
+                    });
+                    formattedHtml += '</ol></div>';
+                } else {
+                    formattedHtml += formatContent(section);
+                }
+            });
+            
+            // Add debug information section at the end
+            if (data.activity_log && data.activity_log.length > 0) {
+                formattedHtml += '<div class="debug-section" style="margin-top: 30px; padding: 20px; background: #f0f4f8; border-radius: 8px; border-left: 4px solid #667eea;">';
+                formattedHtml += '<h3>🔍 Research Debug Information</h3>';
+                
+                // Calculate statistics
+                const searchLogs = data.activity_log.filter(log => log.message.includes('Searching') || log.message.includes('Found'));
+                const totalSources = searchLogs.reduce((acc, log) => {
+                    if (log.verbose && log.verbose.count) {
+                        return acc + log.verbose.count;
+                    }
+                    return acc;
+                }, 0);
+                
+                const apisUsed = new Set();
+                searchLogs.forEach(log => {
+                    if (log.verbose && log.verbose.api) {
+                        apisUsed.add(log.verbose.api);
+                    }
+                });
+                
+                formattedHtml += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">';
+                formattedHtml += `<div><strong>Total Activities:</strong> ${data.activity_log.length}</div>`;
+                formattedHtml += `<div><strong>Sources Found:</strong> ${totalSources}</div>`;
+                formattedHtml += `<div><strong>APIs Used:</strong> ${Array.from(apisUsed).join(', ') || 'N/A'}</div>`;
+                formattedHtml += `<div><strong>Research Duration:</strong> ${calculateDuration(data.created_at, data.completed_at || new Date().toISOString())}</div>`;
+                formattedHtml += '</div>';
+                
+                // Add expandable full activity log
+                formattedHtml += '<details style="margin-top: 15px;">';
+                formattedHtml += '<summary style="cursor: pointer; font-weight: bold;">📋 Full Activity Log</summary>';
+                formattedHtml += '<div style="margin-top: 10px; max-height: 300px; overflow-y: auto; padding: 10px; background: white; border-radius: 4px;">';
+                data.activity_log.forEach(entry => {
+                    formattedHtml += `<div style="margin-bottom: 8px; padding: 8px; background: #f9fafb; border-radius: 4px;">`;
+                    formattedHtml += `<div style="font-size: 0.85em; color: #999;">${new Date(entry.time).toLocaleTimeString()}</div>`;
+                    formattedHtml += `<div style="font-weight: 500;">${entry.message}</div>`;
+                    if (entry.detail) {
+                        formattedHtml += `<div style="color: #666; font-size: 0.9em; margin-top: 4px;">${entry.detail}</div>`;
+                    }
+                    if (entry.verbose) {
+                        formattedHtml += `<details style="margin-top: 4px;"><summary style="cursor: pointer; font-size: 0.85em; color: #667eea;">Verbose Data</summary>`;
+                        formattedHtml += `<pre style="font-size: 0.8em; background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(entry.verbose, null, 2)}</pre>`;
+                        formattedHtml += `</details>`;
+                    }
+                    formattedHtml += `</div>`;
+                });
+                formattedHtml += '</div>';
+                formattedHtml += '</details>';
+                
+                formattedHtml += '</div>';
+            }
+            
+            document.getElementById('resultContent').innerHTML = formattedHtml;
+            window.currentResult = data.result;
+        }
+        
+        // Helper function to calculate duration
+        function calculateDuration(start, end) {
+            const duration = new Date(end) - new Date(start);
+            const seconds = Math.floor(duration / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            if (minutes > 0) {
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+            return `${seconds}s`;
+        }
+
+        // Format content with better HTML
+        function formatContent(text) {
+            // Convert markdown to HTML
+            let html = text
+                .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+                .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // Add paragraphs for better readability
+            const paragraphs = html.split(/\n\n+/);
+            html = paragraphs.map(p => {
+                p = p.trim();
+                if (p && !p.startsWith('<h') && !p.startsWith('<ul') && !p.startsWith('<ol')) {
+                    return `<p>${p}</p>`;
+                }
+                return p;
+            }).join('\n');
+            
+            return html;
+        }
+
+        // Show error
+        function showError(message) {
+            document.getElementById('progressSection').style.display = 'none';
+            showNotification('Error: ' + message, 'error');
+        }
+
+        // Copy results
+        function copyResults() {
+            if (window.currentResult) {
+                navigator.clipboard.writeText(window.currentResult).then(() => {
+                    showNotification('Results copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        // Download results
+        function downloadResults() {
+            if (window.currentResult) {
+                const blob = new Blob([window.currentResult], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `research_${new Date().toISOString().slice(0,10)}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Save to recent research
+        function saveToRecent(data) {
+            let recent = JSON.parse(localStorage.getItem('recentResearch') || '[]');
+            recent.unshift({
+                topic: data.topic,
+                timestamp: new Date().toISOString(),
+                summary: data.result.substring(0, 200) + '...'
+            });
+            recent = recent.slice(0, 10);
+            localStorage.setItem('recentResearch', JSON.stringify(recent));
+            loadRecentResearch();
+        }
+
+        // Load recent research
+        function loadRecentResearch() {
+            const recent = JSON.parse(localStorage.getItem('recentResearch') || '[]');
+            const recentList = document.getElementById('recentList');
+            
+            if (recent.length === 0) {
+                recentList.innerHTML = '<p class="empty-state" style="text-align: center; color: #999; padding: 30px; font-style: italic;">No recent research yet. Start your first research above!</p>';
+            } else {
+                recentList.innerHTML = recent.map((item, index) => `
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; border-left: 4px solid transparent;"
+                         onmouseover="this.style.background='#e9ecef'; this.style.transform='translateX(5px)'; this.style.borderLeftColor='#667eea';"
+                         onmouseout="this.style.background='#f8f9fa'; this.style.transform=''; this.style.borderLeftColor='transparent';"
+                         onclick='setTopic("${item.topic.replace(/'/g, "\\'")}");'>
+                        <h4 style="color: #667eea; margin-bottom: 5px;">${item.topic}</h4>
+                        <p style="color: #999; font-size: 0.85em; margin-bottom: 5px;">${new Date(item.timestamp).toLocaleString()}</p>
+                        <p style="color: #666; font-size: 0.9em; line-height: 1.4;">${item.summary}</p>
+                    </div>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>

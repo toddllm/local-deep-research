@@ -1,4 +1,18 @@
-# Local Deep Researcher
+# 🔬 Local Deep Researcher
+
+**AI-Powered Research Assistant with Source Validation and Multi-Model Support**
+
+Local Deep Researcher is an advanced AI research tool that combines multiple search sources, configurable language models, and intelligent source validation to provide comprehensive research reports. Built with LangGraph for sophisticated workflow management and Flask for an intuitive web interface.
+
+## ✨ New Features (Latest Update)
+
+- **🌐 Multi-Source Aggregation**: Combine results from Tavily, arXiv, DuckDuckGo, SearXNG, and Perplexity
+- **🎛️ Advanced Model Configuration**: Use different models for query generation and summarization  
+- **📊 Real-time Progress Tracking**: Detailed activity logs with verbose debugging information
+- **✅ Intelligent Source Validation**: AI-powered relevance scoring and quality filtering
+- **🚀 Modern Web Interface**: Responsive UI with real-time updates and export capabilities
+
+## Overview
 
 Local Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search) or [LMStudio](https://lmstudio.ai/). Give it a topic and it will generate a web search query, gather web search results, summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, and repeat for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used to generate the summary.
 
@@ -19,9 +33,70 @@ See it in action or build it yourself? Check out these helpful video tutorials:
 - [Overview of Local Deep Researcher with R1](https://www.youtube.com/watch?v=sGUjmyfof4Q) - Load and test [DeepSeek R1](https://api-docs.deepseek.com/news/news250120) [distilled models](https://ollama.com/library/deepseek-r1).
 - [Building Local Deep Researcher from Scratch](https://www.youtube.com/watch?v=XGuTzHoqlj8) - Overview of how this is built.
 
-## 🚀 Quickstart
+## 🚀 Web Interface Quickstart
 
-Clone the repository:
+For the easiest experience, use the built-in web interface:
+
+### Quick Setup
+1. **Install and start Ollama**:
+```bash
+# Install Ollama from https://ollama.ai
+ollama serve
+ollama pull llama3.1:8b  # or any other model
+```
+
+2. **Clone and run**:
+```bash
+git clone https://github.com/toddllm/local-deep-research.git
+cd local-deep-research
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+3. **Open your browser** to http://localhost:5001
+
+### Web Interface Features
+
+#### 🎛️ Configuration Panel
+- **Model Selection**: Automatically detects installed Ollama models
+- **Search Provider**: Choose from Tavily, DuckDuckGo, arXiv, SearXNG, Perplexity
+- **Research Depth**: 1-5 loops (3 recommended for thorough research)
+- **Advanced Mode**: Multi-source search and specialized model configuration
+
+#### 🌐 Advanced Mode
+Enable for enhanced capabilities:
+- **Multi-Source Search**: Aggregate results from multiple providers simultaneously
+- **Advanced Model Config**: Use different models for query generation vs summarization
+- **Example**: Use fast model for queries, large model for summarization
+
+#### 📊 Real-Time Monitoring
+- **Activity Timeline**: Live progress updates with timestamps
+- **Verbose Logging**: Expandable details for each research step
+- **Debug Panel**: Performance metrics, source counts, and full activity logs
+- **Export Options**: Download results as Markdown files
+
+#### 🔍 Search Provider Options
+- **Tavily** (Recommended): High-quality web search with API key
+- **arXiv**: Academic papers (no API key required)
+- **DuckDuckGo**: Privacy-focused search (no API key required)
+- **SearXNG**: Self-hosted search engine
+- **Perplexity**: AI-enhanced search results
+
+### Example Research Flow
+1. Select model: `llama3.1:8b`
+2. Enable Advanced Mode
+3. Select sources: `Tavily + arXiv`
+4. Set depth: `3 loops`
+5. Enter topic: "Latest quantum computing breakthroughs"
+6. Watch real-time progress and get comprehensive results!
+
+## 🔧 LangGraph Studio (Advanced)
+
+For advanced users and developers, use LangGraph Studio:
+
+### Clone and Setup
 ```shell
 git clone https://github.com/langchain-ai/local-deep-researcher.git
 cd local-deep-researcher
@@ -186,6 +261,54 @@ The final summary is saved to the graph state as well:
 There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#deployment-options) to deploy this graph. See [Module 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6) of LangChain Academy for a detailed walkthrough of deployment options with LangGraph.
 
 ## TypeScript Implementation
+
+## ✅ What's Working
+
+### Core Features
+- ✅ **Multi-source search aggregation** (Tavily + arXiv + DuckDuckGo + SearXNG + Perplexity)
+- ✅ **Advanced model configuration** (separate models for query generation and summarization)
+- ✅ **Real-time progress tracking** with detailed activity logs
+- ✅ **Source validation** with AI-powered relevance scoring
+- ✅ **Web interface** with responsive design and real-time updates
+- ✅ **Export functionality** (Markdown download)
+- ✅ **Research history** with saved previous searches
+- ✅ **Dynamic model detection** from Ollama
+- ✅ **Configurable research depth** (1-5 loops)
+- ✅ **Verbose debugging** with expandable activity logs
+
+### Search Providers
+- ✅ **Tavily**: High-quality web search with full content extraction
+- ✅ **arXiv**: Academic paper search (working in multi-source mode)
+- ✅ **DuckDuckGo**: Privacy-focused web search
+- ✅ **SearXNG**: Self-hosted metasearch engine
+- ✅ **Perplexity**: AI-powered search with citations
+
+### Advanced Features
+- ✅ **Multi-source aggregation**: Combines results from selected providers
+- ✅ **Source deduplication**: Prevents duplicate content
+- ✅ **Progressive enhancement**: Iterative research with gap analysis
+- ✅ **Activity timeline**: Real-time progress with timestamps
+- ✅ **Debug information panel**: Performance metrics and detailed logs
+
+## 🐛 Known Issues
+
+The following issues have been identified and will be addressed in future updates:
+
+### Current Issues
+1. **Query Generation**: Generic fallback queries ("Tell me more about...") instead of optimized search terms
+2. **Source Repetition**: Same sources may be retrieved across multiple research loops
+3. **Academic Paper Relevance**: arXiv results sometimes return tangentially related papers
+4. **Search Query Optimization**: AI-generated queries could be more specific and targeted
+5. **Memory Usage**: Large models may consume significant RAM during research
+
+### Planned Improvements
+- Better query generation with topic-specific optimization
+- Enhanced source diversity across research loops
+- Improved relevance scoring for academic papers
+- Query refinement based on previous search results
+- Memory optimization for resource-constrained environments
+
+## 🔄 Alternative Implementations
 
 A TypeScript port of this project (without Perplexity search) is available at:
 https://github.com/PacoVK/ollama-deep-researcher-ts

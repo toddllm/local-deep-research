@@ -11,6 +11,10 @@ class SummaryState:
     sources_gathered: Annotated[list, operator.add] = field(default_factory=list)
     research_loop_count: int = field(default=0)  # Research loop count
     running_summary: str = field(default=None)  # Final report
+    validated_sources: bool = field(default=False)  # Source validation flag
+    validation_retry_needed: bool = field(default=False)  # Need to retry search
+    validation_retries: int = field(default=0)  # Number of validation retries
+    validation_failed: bool = field(default=False)  # Validation completely failed
 
 
 @dataclass(kw_only=True)

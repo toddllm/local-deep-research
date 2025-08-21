@@ -11,6 +11,7 @@ class SearchAPI(Enum):
     TAVILY = "tavily"
     DUCKDUCKGO = "duckduckgo"
     SEARXNG = "searxng"
+    ARXIV = "arxiv"
 
 
 class Configuration(BaseModel):
@@ -31,11 +32,11 @@ class Configuration(BaseModel):
         title="LLM Provider",
         description="Provider for the LLM (Ollama or LMStudio)",
     )
-    search_api: Literal["perplexity", "tavily", "duckduckgo", "searxng"] = Field(
-        default="duckduckgo", title="Search API", description="Web search API to use"
+    search_api: Literal["perplexity", "tavily", "duckduckgo", "searxng", "arxiv"] = Field(
+        default="tavily", title="Search API", description="Web search API to use (tavily recommended)"
     )
     fetch_full_page: bool = Field(
-        default=True,
+        default=False,
         title="Fetch Full Page",
         description="Include the full page content in the search results",
     )
@@ -58,6 +59,21 @@ class Configuration(BaseModel):
         default=False,
         title="Use Tool Calling",
         description="Use tool calling instead of JSON mode for structured output",
+    )
+    min_source_relevance_score: float = Field(
+        default=0.5,
+        title="Minimum Source Relevance Score",
+        description="Minimum relevance score (0-1) to accept a source",
+    )
+    require_valid_sources: bool = Field(
+        default=True,
+        title="Require Valid Sources",
+        description="Retry search if no valid sources found",
+    )
+    max_validation_retries: int = Field(
+        default=1,
+        title="Maximum Validation Retries",
+        description="Maximum number of search retries when sources fail validation",
     )
 
     @classmethod
