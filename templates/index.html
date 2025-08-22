@@ -1133,9 +1133,15 @@
                     config.search_apis = selectedMultiSources;
                     if (queryModelSelect.value) {
                         config.query_model = queryModelSelect.value;
+                    } else {
+                        // Use main model for query generation
+                        config.query_model = modelSelect.value;
                     }
                     if (summaryModelSelect.value) {
                         config.summarization_model = summaryModelSelect.value;
+                    } else {
+                        // Use main model for summarization
+                        config.summarization_model = modelSelect.value;
                     }
                 }
                 

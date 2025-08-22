@@ -31,9 +31,24 @@ CORS(app)
 # Store research tasks (in production, use Redis or database)
 research_tasks = {}
 
-def run_research_task(task_id, topic, custom_config=None):
+def run_research_task(task_id, topic, custom_config=None, env_vars=None):
     """Run research in background thread."""
     try:
+        # Set environment variables in background thread
+        if env_vars:
+            for key, value in env_vars.items():
+                if value:
+                    os.environ[key] = value
+        
+        # Also load from .env as backup
+        load_dotenv()
+        
+        # Explicitly ensure Tavily API key is available
+        tavily_key = os.getenv('TAVILY_API_KEY')
+        if not tavily_key:
+            research_tasks[task_id]['status'] = 'failed'
+            research_tasks[task_id]['error'] = f'TAVILY_API_KEY not available in background thread. Env vars passed: {list(env_vars.keys()) if env_vars else None}'
+            return
         # Update status
         research_tasks[task_id]['status'] = 'running'
         research_tasks[task_id]['started_at'] = datetime.now().isoformat()
@@ -230,8 +245,15 @@ def start_research():
         'progress': 'Initializing...'
     }
     
-    # Start research in background thread with custom config
-    thread = threading.Thread(target=run_research_task, args=(task_id, topic, custom_config))
+    # Pass environment variables to background thread
+    env_vars = {
+        'TAVILY_API_KEY': os.getenv('TAVILY_API_KEY'),
+        'LOCAL_LLM': os.getenv('LOCAL_LLM'),
+        'SEARCH_API': os.getenv('SEARCH_API'),
+    }
+    
+    # Start research in background thread with custom config and environment
+    thread = threading.Thread(target=run_research_task, args=(task_id, topic, custom_config, env_vars))
     thread.daemon = True
     thread.start()
     

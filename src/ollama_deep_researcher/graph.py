@@ -136,7 +136,8 @@ def get_llm(configurable: Configuration, model_override: str = None):
                 base_url=configurable.ollama_base_url,
                 model=model,
                 temperature=0,
-                format="json",
+                # Removed format="json" - causes malformed JSON with control characters
+                # Using prompt-based JSON instead for reliable output
             )
 
 # Nodes
@@ -444,6 +445,14 @@ def web_research(state: SummaryState, config: RunnableConfig):
             for result in search_results["results"]:
                 if "url" in result:
                     state.seen_urls.add(result["url"])
+        
+        # Log successful search
+        num_results = len(search_results.get("results", [])) if search_results else 0
+        progress_callback(
+            f"✅ {search_api.title()} search successful",
+            f"Found {num_results} results for web research",
+            {"api": search_api, "results_count": num_results}
+        )
 
         return {
             "sources_gathered": [format_sources(search_results)],
@@ -687,7 +696,11 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
 
     # For summarization, we don't need structured output, so always use regular mode
     # Check if we have a separate summarization model configured
-    summarization_model = config.get("configurable", {}).get("summarization_model", configurable.local_llm)
+    # If not specified, use the main model from the current configuration
+    summarization_model = config.get("configurable", {}).get("summarization_model")
+    if not summarization_model:
+        # Use the main model that was selected by the user
+        summarization_model = configurable.local_llm
     
     if configurable.llm_provider == "lmstudio":
         llm = ChatLMStudio(
@@ -701,8 +714,6 @@ def summarize_sources(state: SummaryState, config: RunnableConfig):
             model=summarization_model,
             temperature=0,
         )
-    
-    summarization_model = config.get("configurable", {}).get("summarization_model", configurable.local_llm)
     progress_callback(
         f"🤖 Invoking {summarization_model} for summarization",
         f"Using {configurable.llm_provider} provider",

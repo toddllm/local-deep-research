@@ -44,9 +44,13 @@ Rationale: "Specific technical terms, includes recent developments, focuses on i
 </EXAMPLE>"""
 
 json_mode_query_instructions = """<FORMAT>
-Format your response as a JSON object with ALL three of these exact keys:
+You MUST respond with valid JSON format only. Do not include any text before or after the JSON object.
+
+Format your response as a JSON object with these exact keys:
 - "query": The actual search query string
 - "rationale": Brief explanation of why this query is relevant
+
+Example: {"query": "machine learning transformer architecture 2024", "rationale": "Targets recent developments in transformer models"}
 </FORMAT>
 
 Provide your response in JSON format:"""

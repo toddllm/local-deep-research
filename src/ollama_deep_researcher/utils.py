@@ -306,7 +306,12 @@ def tavily_search(
                                             fetch_full_page is True
     """
 
-    tavily_client = TavilyClient()
+    # Explicitly pass API key to ensure it's available in threading context
+    api_key = os.getenv('TAVILY_API_KEY')
+    if not api_key:
+        raise ValueError("TAVILY_API_KEY environment variable not set")
+    
+    tavily_client = TavilyClient(api_key=api_key)
     return tavily_client.search(
         query, max_results=max_results, include_raw_content=fetch_full_page
     )

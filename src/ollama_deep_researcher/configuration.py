@@ -100,13 +100,17 @@ class Configuration(BaseModel):
             config["configurable"] if config and "configurable" in config else {}
         )
 
-        # Get raw values from environment or config
+        # Get raw values from config first, then environment as fallback
         raw_values: dict[str, Any] = {
-            name: os.environ.get(name.upper(), configurable.get(name))
+            name: configurable.get(name, os.environ.get(name.upper()))
             for name in cls.model_fields.keys()
         }
 
-        # Filter out None values
-        values = {k: v for k, v in raw_values.items() if v is not None}
+        # Filter out None and empty string values to ensure proper fallbacks
+        values = {k: v for k, v in raw_values.items() if v is not None and v != ""}
+        
+        # Validate that we don't have placeholder values - fail loudly if we do
+        if values.get('local_llm') == 'your_model_name':
+            raise ValueError("LOCAL_LLM is set to placeholder value 'your_model_name'. Please configure a real model name.")
 
         return cls(**values)
